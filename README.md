@@ -1,1 +1,1 @@
-Live Demo: [view prject][https://moviehub-xpqp.onrender.com]
+Live Demo: [view project](https://moviehub-xpqp.onrender.com)
