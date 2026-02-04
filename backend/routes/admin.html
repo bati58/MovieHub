@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel - MovieHub</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, textarea, select { width: 100%; padding: 8px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        .movie-list { margin-top: 30px; }
+        .movie-item { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MovieHub Admin Panel</h1>
+        
+        <form id="movieForm">
+            <input type="hidden" id="movieId">
+            
+            <div class="form-group">
+                <label>Title:</label>
+                <input type="text" id="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea id="description" rows="4" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Year:</label>
+                <input type="number" id="year" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Genre (comma separated):</label>
+                <input type="text" id="genre" placeholder="Action, Adventure, Drama" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Duration:</label>
+                <input type="text" id="duration" placeholder="2h 30m" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Director:</label>
+                <input type="text" id="director" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Cast (comma separated):</label>
+                <input type="text" id="cast" placeholder="Actor 1, Actor 2, Actor 3">
+            </div>
+            
+            <div class="form-group">
+                <label>Poster URL:</label>
+                <input type="text" id="poster" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Download Links:</label>
+                <input type="text" id="download480" placeholder="480p URL">
+                <input type="text" id="download720" placeholder="720p URL">
+                <input type="text" id="download1080" placeholder="1080p URL">
+            </div>
+            
+            <div class="form-group">
+                <label>Stream Link:</label>
+                <input type="text" id="streamLink">
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="featured"> Featured
+                </label>
+                <label>
+                    <input type="checkbox" id="trending"> Trending
+                </label>
+            </div>
+            
+            <button type="submit">Save Movie</button>
+        </form>
+        
+        <div class="movie-list" id="movieList">
+            <h2>Movies</h2>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:5000/api/admin';
+        
+        async function loadMovies() {
+            const response = await fetch(`${API_BASE}/movies`);
+            const movies = await response.json();
+            
+            const list = document.getElementById('movieList');
+            list.innerHTML = '<h2>Movies</h2>';
+            
+            movies.forEach(movie => {
+                const item = document.createElement('div');
+                item.className = 'movie-item';
+                item.innerHTML = `
+                    <h3>${movie.title} (${movie.year})</h3>
+                    <p>${movie.genre.join(', ')}</p>
+                    <button onclick="editMovie('${movie._id}')">Edit</button>
+                    <button onclick="deleteMovie('${movie._id}')">Delete</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+        
+        document.getElementById('movieForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const movieData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                year: parseInt(document.getElementById('year').value),
+                genre: document.getElementById('genre').value.split(',').map(g => g.trim()),
+                duration: document.getElementById('duration').value,
+                director: document.getElementById('director').value,
+                cast: document.getElementById('cast').value.split(',').map(c => c.trim()),
+                poster: document.getElementById('poster').value,
+                downloadLinks: {
+                    '480p': document.getElementById('download480').value,
+                    '720p': document.getElementById('download720').value,
+                    '1080p': document.getElementById('download1080').value
+                },
+                streamLink: document.getElementById('streamLink').value,
+                featured: document.getElementById('featured').checked,
+                trending: document.getElementById('trending').checked
+            };
+            
+            const movieId = document.getElementById('movieId').value;
+            const url = movieId ? `${API_BASE}/movies/${movieId}` : `${API_BASE}/movies`;
+            const method = movieId ? 'PUT' : 'POST';
+            
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(movieData)
+            });
+            
+            if (response.ok) {
+                alert('Movie saved successfully!');
+                resetForm();
+                loadMovies();
+            } else {
+                alert('Error saving movie');
+            }
+        });
+        
+        async function editMovie(id) {
+            const response = await fetch(`${API_BASE}/movies/${id}`);
+            const movie = await response.json();
+            
+            document.getElementById('movieId').value = movie._id;
+            document.getElementById('title').value = movie.title;
+            document.getElementById('description').value = movie.description;
+            document.getElementById('year').value = movie.year;
+            document.getElementById('genre').value = movie.genre.join(', ');
+            document.getElementById('duration').value = movie.duration;
+            document.getElementById('director').value = movie.director;
+            document.getElementById('cast').value = movie.cast.join(', ');
+            document.getElementById('poster').value = movie.poster;
+            document.getElementById('download480').value = movie.downloadLinks['480p'] || '';
+            document.getElementById('download720').value = movie.downloadLinks['720p'] || '';
+            document.getElementById('download1080').value = movie.downloadLinks['1080p'] || '';
+            document.getElementById('streamLink').value = movie.streamLink || '';
+            document.getElementById('featured').checked = movie.featured;
+            document.getElementById('trending').checked = movie.trending;
+        }
+        
+        async function deleteMovie(id) {
+            if (confirm('Are you sure you want to delete this movie?')) {
+                await fetch(`${API_BASE}/movies/${id}`, {
+                    method: 'DELETE'
+                });
+                loadMovies();
+            }
+        }
+        
+        function resetForm() {
+            document.getElementById('movieForm').reset();
+            document.getElementById('movieId').value = '';
+        }
+        
+        // Load movies on page load
+        loadMovies();
+    </script>
+</body>
+</html>
