@@ -32,7 +32,12 @@ router.get('/', async (req, res) => {
         }
 
         if (search) {
-            query.title = { $regex: search, $options: 'i' };
+            const searchRegex = { $regex: search, $options: 'i' };
+            query.$or = [
+                { title: searchRegex },
+                { genre: searchRegex },
+                { cast: searchRegex }
+            ];
         }
 
         let sortOption = {};
@@ -127,7 +132,11 @@ router.get('/search/suggestions', async (req, res) => {
         if (!q) return res.json([]);
 
         const suggestions = await Movie.find({
-            title: { $regex: q, $options: 'i' }
+            $or: [
+                { title: { $regex: q, $options: 'i' } },
+                { genre: { $regex: q, $options: 'i' } },
+                { cast: { $regex: q, $options: 'i' } }
+            ]
         })
             .limit(10)
             .select('title year poster');
