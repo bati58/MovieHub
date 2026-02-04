@@ -1,4 +1,4 @@
-![MovieHub](.frontend/screenshot.png)
+![MovieHub](frontend/screenshot.png)
 
 
 
