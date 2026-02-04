@@ -1,4 +1,4 @@
-![MovieHub](assets/images/project6.png)
+![MovieHub](frontend/screenshot.png)
 
 
 
