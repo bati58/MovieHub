@@ -240,11 +240,13 @@
                     <p>MovieHub provides movie metadata, trailers, and provider links. We do not host or distribute full
                         movies.</p>
                     <button class="legal-btn" data-legal="terms">Read Terms</button>
+                    <a class="legal-link" href="#" data-download="terms">Download Terms (PDF)</a>
                 </div>
                 <div id="privacy" class="legal-card">
                     <h3>Privacy Policy</h3>
                     <p>We do not sell personal data. Basic analytics may be used to improve the experience.</p>
                     <button class="legal-btn" data-legal="privacy">Read Privacy</button>
+                    <a class="legal-link" href="#" data-download="privacy">Download Privacy (PDF)</a>
                 </div>
                 <div id="dmca" class="legal-card">
                     <h3>DMCA</h3>
@@ -269,19 +271,31 @@
                     <button class="legal-btn" data-legal="contact">Contact Us</button>
                 </div>
             </div>
-            <div class="legal-downloads">
-                <a class="legal-link" href="#" data-download="terms">Download Terms (PDF)</a>
-                <a class="legal-link" href="#" data-download="privacy">Download Privacy (PDF)</a>
-            </div>
             <div class="contact-form">
                 <h3>Send a Message</h3>
-                <form id="contactForm">
+                <form id="contactForm" novalidate>
                     <div class="form-row">
-                        <input type="text" name="name" placeholder="Your name" required>
-                        <input type="email" name="email" placeholder="Your email" required>
+                        <div class="form-field">
+                            <input type="text" id="contactName" name="name" placeholder="Your name" required
+                                autocomplete="name" aria-describedby="contactNameError">
+                            <small class="field-error" id="contactNameError" aria-live="polite"></small>
+                        </div>
+                        <div class="form-field">
+                            <input type="email" id="contactEmail" name="email" placeholder="Your email" required
+                                autocomplete="email" aria-describedby="contactEmailError">
+                            <small class="field-error" id="contactEmailError" aria-live="polite"></small>
+                        </div>
                     </div>
-                    <input type="text" name="subject" placeholder="Subject" required>
-                    <textarea name="message" rows="5" placeholder="Your message" required></textarea>
+                    <div class="form-field">
+                        <input type="text" id="contactSubject" name="subject" placeholder="Subject" required
+                            autocomplete="off" aria-describedby="contactSubjectError">
+                        <small class="field-error" id="contactSubjectError" aria-live="polite"></small>
+                    </div>
+                    <div class="form-field">
+                        <textarea id="contactMessage" name="message" rows="5" placeholder="Your message" required
+                            aria-describedby="contactMessageError"></textarea>
+                        <small class="field-error" id="contactMessageError" aria-live="polite"></small>
+                    </div>
                     <button type="submit" class="legal-btn">Send Message</button>
                 </form>
 
@@ -480,31 +494,45 @@
             </div>
             <p class="form-note auth-message" id="authMessage"></p>
             <div class="auth-panels">
-                <form id="loginForm" class="auth-form active">
+                <form id="loginForm" class="auth-form active" novalidate>
                     <div class="auth-form-header">
                         <h3>Welcome back</h3>
                         <p>Sign in to manage your watchlist and viewing history.</p>
                     </div>
-                    <label>Email</label>
-                    <input type="email" name="email" placeholder="you@example.com" required autocomplete="username">
-                    <label>Password</label>
-                    <input type="password" name="password" placeholder="Your password" required
-                        autocomplete="current-password">
+                    <div class="form-field">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" name="email" placeholder="you@example.com" required
+                            autocomplete="username" aria-describedby="loginEmailError">
+                        <small class="field-error" id="loginEmailError" aria-live="polite"></small>
+                    </div>
+                    <div class="form-field">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" name="password" placeholder="Your password" required
+                            autocomplete="current-password" aria-describedby="loginPasswordError">
+                        <small class="field-error" id="loginPasswordError" aria-live="polite"></small>
+                    </div>
                     <div class="auth-actions">
                         <button type="submit" class="filter-btn">Sign in</button>
                         <button type="button" id="openResetTab" class="filter-btn secondary">Forgot password?</button>
                     </div>
                 </form>
-                <form id="registerForm" class="auth-form">
+                <form id="registerForm" class="auth-form" novalidate>
                     <div class="auth-form-header">
                         <h3>Create your account</h3>
                         <p>Use an email and password to save favorites across sessions.</p>
                     </div>
-                    <label>Email</label>
-                    <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
-                    <label>Password</label>
-                    <input type="password" name="password" placeholder="Create a password" required
-                        autocomplete="new-password">
+                    <div class="form-field">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" name="email" placeholder="you@example.com" required
+                            autocomplete="email" aria-describedby="registerEmailError">
+                        <small class="field-error" id="registerEmailError" aria-live="polite"></small>
+                    </div>
+                    <div class="form-field">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" name="password" placeholder="Create a password"
+                            required autocomplete="new-password" aria-describedby="registerPasswordError">
+                        <small class="field-error" id="registerPasswordError" aria-live="polite"></small>
+                    </div>
                     <button type="submit" class="filter-btn">Create account</button>
                 </form>
                 <div id="resetPanel" class="auth-form">
@@ -512,21 +540,28 @@
                         <div class="reset-card">
                             <h4>Request a reset link</h4>
                             <p class="form-note">We will email a secure link that expires in 30 minutes.</p>
-                            <form id="forgotForm" class="auth-form inner">
-                                <label>Email</label>
-                                <input type="email" name="email" placeholder="you@example.com" required
-                                    autocomplete="email">
+                            <form id="forgotForm" class="auth-form inner" novalidate>
+                                <div class="form-field">
+                                    <label for="forgotEmail">Email</label>
+                                    <input type="email" id="forgotEmail" name="email" placeholder="you@example.com"
+                                        required autocomplete="email" aria-describedby="forgotEmailError">
+                                    <small class="field-error" id="forgotEmailError" aria-live="polite"></small>
+                                </div>
                                 <button type="submit" class="filter-btn">Send reset link</button>
                             </form>
                         </div>
                         <div class="reset-card">
                             <h4>Set a new password</h4>
                             <p class="form-note" id="resetHint">Open the email link to continue.</p>
-                            <form id="resetForm" class="auth-form inner" data-ready="false">
+                            <form id="resetForm" class="auth-form inner" data-ready="false" novalidate>
                                 <input type="hidden" name="token" id="resetTokenInput" autocomplete="off">
-                                <label>New password</label>
-                                <input type="password" name="password" placeholder="New password" required
-                                    autocomplete="new-password">
+                                <div class="form-field">
+                                    <label for="resetPassword">New password</label>
+                                    <input type="password" id="resetPassword" name="password"
+                                        placeholder="New password" required autocomplete="new-password"
+                                        aria-describedby="resetPasswordError">
+                                    <small class="field-error" id="resetPasswordError" aria-live="polite"></small>
+                                </div>
                                 <button type="submit" class="filter-btn">Update password</button>
                             </form>
                         </div>

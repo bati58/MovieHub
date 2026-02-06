@@ -329,7 +329,7 @@ body {
 }
 
 .section-legal {
-    background: #4f200d;
+    background: #4b2a1a;
 }
 
 .section-admin {
@@ -583,23 +583,27 @@ body {
 /* Footer */
 .footer {
     background: #511D43;
-    padding: 3rem 0 1.2rem;
-    margin-top: 2rem;
+    padding: 2.2rem 0 0.9rem;
+    margin-top: 1.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer .container {
+    max-width: 1200px;
 }
 
 .footer-content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 2.6rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+    margin-bottom: 1.5rem;
     align-items: start;
 }
 
 .footer-section h3,
 .footer-section h4 {
     color: var(--text-color);
-    margin-bottom: 1rem;
+    margin-bottom: 0.6rem;
     letter-spacing: 0.02em;
 }
 
@@ -613,8 +617,8 @@ body {
 }
 
 .footer-subtitle {
-    margin-top: 1rem;
-    margin-bottom: 0.65rem;
+    margin-top: 0.75rem;
+    margin-bottom: 0.4rem;
     font-size: 1rem;
     color: var(--text-color);
 }
@@ -623,11 +627,11 @@ body {
     color: var(--text-secondary);
     font-size: 0.95rem;
     max-width: 320px;
-    margin-bottom: 0.9rem;
+    margin-bottom: 0.6rem;
 }
 
 .footer-note-muted {
-    margin-bottom: 1rem;
+    margin-bottom: 0.6rem;
 }
 
 .footer-contact-list {
@@ -635,7 +639,7 @@ body {
     padding: 0;
     margin: 0;
     display: grid;
-    gap: 0.65rem;
+    gap: 0.5rem;
 }
 
 .footer-contact-list li {
@@ -663,7 +667,7 @@ body {
 .footer-link-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(120px, 1fr));
-    gap: 0.45rem 1.8rem;
+    gap: 0.35rem 1.2rem;
 }
 
 .footer-link-grid a {
@@ -681,7 +685,7 @@ body {
     align-items: center;
     gap: 0.7rem;
     flex-wrap: wrap;
-    margin-top: 0.4rem;
+    margin-top: 0.2rem;
 }
 
 .footer-social-row .social-link {
@@ -693,7 +697,7 @@ body {
 
 .footer-bottom {
     text-align: center;
-    padding-top: 2rem;
+    padding-top: 1.2rem;
     border-top: 1px solid #2a004f;
     color: var(--text-secondary);
     font-size: 0.9rem;
@@ -972,6 +976,8 @@ body {
     border-radius: 12px;
     padding: 1.25rem;
     border: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
 }
 
 .legal-card h3 {
@@ -1027,11 +1033,42 @@ body {
 }
 
 .legal-link {
-    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
     text-decoration: none;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(174, 210, 255, 0.5);
+    padding: 0.55rem 0.9rem;
     border-radius: 8px;
+    background: rgba(174, 210, 255, 0.12);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: transform 0.2s, border 0.2s, background 0.2s, color 0.2s;
+}
+
+.legal-link:hover {
+    color: #fff;
+    border-color: rgba(174, 210, 255, 0.7);
+    background: rgba(174, 210, 255, 0.22);
+    transform: translateY(-1px);
+}
+
+.legal-card .legal-btn,
+.legal-card .legal-link {
+    width: 100%;
+    text-align: center;
+}
+
+.legal-card .legal-btn {
+    margin-top: auto;
+    width: auto;
+    min-width: 160px;
+    align-self: center;
+}
+
+.legal-card .legal-link {
+    margin-top: 0.6rem;
 }
 
 .legal-email {
@@ -1093,42 +1130,92 @@ body {
     background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 12px;
-    padding: 1.25rem;
+    padding: 1.5rem;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.contact-form form {
+    max-width: 640px;
+    margin: 0 auto;
 }
 
 .contact-form h3 {
     margin-bottom: 1rem;
+    text-align: center;
+}
+
+.contact-form .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+    margin-bottom: 0.75rem;
 }
 
 .contact-form .form-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
     margin-bottom: 0.75rem;
 }
 
-.contact-form input,
-.contact-form textarea {
-    width: 100%;
-    padding: 0.65rem 0.75rem;
-    background: #1a0032;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--text-color);
-    border-radius: 8px;
+.contact-form .form-row .form-field {
+    margin-bottom: 0;
 }
 
 .contact-form input,
 .contact-form textarea {
-    margin-bottom: 0.75rem;
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    background: #1a0032;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-color);
+    border-radius: 8px;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 0;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: rgba(148, 0, 255, 0.6);
+    box-shadow: 0 0 0 3px rgba(148, 0, 255, 0.15);
+}
+
+.contact-form input.input-error,
+.contact-form textarea.input-error {
+    border-color: rgba(255, 121, 121, 0.8);
+    box-shadow: 0 0 0 3px rgba(255, 121, 121, 0.18);
+}
+
+.contact-form .field-error {
+    display: none;
+    color: #ffb3b3;
+    font-size: 0.85rem;
+}
+
+.contact-form .field-error.is-visible {
+    display: block;
 }
 
 .contact-form button.legal-btn {
-    width: 100%;
-    margin-top: 0.75rem;
+    width: auto;
+    min-width: 180px;
+    margin: 0.75rem auto 0;
+    display: block;
+}
+
+@media (max-width: 640px) {
+    .contact-form .form-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 .legal-downloads {
     flex-direction: column;
+    align-items: center;
 }
 
 .form-note {
@@ -1549,10 +1636,30 @@ body {
     transition: border 0.2s ease, box-shadow 0.2s ease;
 }
 
+.auth-form .form-field {
+    display: grid;
+    gap: 0.35rem;
+}
+
 .auth-form input:focus {
     outline: none;
     border-color: rgba(148, 0, 255, 0.6);
     box-shadow: 0 0 0 3px rgba(148, 0, 255, 0.15);
+}
+
+.auth-form input.input-error {
+    border-color: rgba(255, 121, 121, 0.8);
+    box-shadow: 0 0 0 3px rgba(255, 121, 121, 0.18);
+}
+
+.auth-form .field-error {
+    display: none;
+    color: #ffb3b3;
+    font-size: 0.85rem;
+}
+
+.auth-form .field-error.is-visible {
+    display: block;
 }
 
 .reset-stack {

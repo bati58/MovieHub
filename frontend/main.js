@@ -568,27 +568,32 @@ function initUserAccount() {
             updateResetState();
         });
     }
+    setupAuthValidation();
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!validateAuthForm('login')) return;
             await handleAuthSubmit('login', new FormData(loginForm));
         });
     }
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!validateAuthForm('register')) return;
             await handleAuthSubmit('register', new FormData(registerForm));
         });
     }
     if (forgotForm) {
         forgotForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!validateAuthForm('forgot')) return;
             await handleForgotSubmit(new FormData(forgotForm));
         });
     }
     if (resetForm) {
         resetForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!validateAuthForm('reset')) return;
             await handleResetSubmit(new FormData(resetForm));
         });
     }
@@ -631,6 +636,7 @@ function closeAuthModalView() {
     if (!authModal) return;
     authModal.style.display = 'none';
     document.body.style.overflow = 'auto';
+    clearAuthFieldErrors();
 }
 
 function switchAuthTab(tab) {
@@ -642,6 +648,7 @@ function switchAuthTab(tab) {
     if (registerForm) registerForm.classList.toggle('active', tab === 'register');
     if (resetPanel) resetPanel.classList.toggle('active', tab === 'reset');
     if (authMessage) authMessage.textContent = '';
+    clearAuthFieldErrors();
     if (tab === 'reset') {
         updateResetState();
     }
@@ -665,6 +672,167 @@ function updateResetState(tokenValue) {
             ? 'Verified reset link detected. Set a new password below.'
             : 'Open the reset link from your email to set a new password.';
     }
+}
+
+let authValidationState = {
+    validators: new Map(),
+    normalizers: new Map(),
+    fieldsByForm: new Map(),
+    isReady: false
+};
+
+function setupAuthValidation() {
+    if (authValidationState.isReady) return;
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    const registerEmail = document.getElementById('registerEmail');
+    const registerPassword = document.getElementById('registerPassword');
+    const forgotEmail = document.getElementById('forgotEmail');
+    const resetPassword = document.getElementById('resetPassword');
+
+    const normalizeEmail = (value) => value.trim().toLowerCase();
+    const normalizeSingleLine = (value) => value.replace(/\s+/g, ' ').trim();
+
+    const validateEmail = (value) => {
+        const normalized = normalizeSingleLine(value);
+        if (!normalized) return 'Please enter your email address.';
+        if (normalized.length > 254) return 'Email must be 254 characters or fewer.';
+        const parts = normalized.split('@');
+        if (parts.length !== 2) return 'Enter a valid email address.';
+        const [local, domain] = parts;
+        if (!local || !domain) return 'Enter a valid email address.';
+        if (local.length > 64) return 'Email local part must be 64 characters or fewer.';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+            return 'Enter a valid email address (e.g., name@example.com).';
+        }
+        return '';
+    };
+
+    const validateLoginPassword = (value) => {
+        if (!value) return 'Please enter your password.';
+        if (value.length > 128) return 'Password must be 128 characters or fewer.';
+        return '';
+    };
+
+    const validateStrongPassword = (value) => {
+        if (!value) return 'Please enter a password.';
+        if (value.length < 8) return 'Password must be at least 8 characters.';
+        if (value.length > 72) return 'Password must be 72 characters or fewer.';
+        if (!/[A-Za-z]/.test(value) || !/[0-9]/.test(value)) {
+            return 'Password must include at least one letter and one number.';
+        }
+        return '';
+    };
+
+    authValidationState.validators = new Map([
+        [loginEmail, validateEmail],
+        [registerEmail, validateEmail],
+        [forgotEmail, validateEmail],
+        [loginPassword, validateLoginPassword],
+        [registerPassword, validateStrongPassword],
+        [resetPassword, validateStrongPassword]
+    ]);
+
+    authValidationState.normalizers = new Map([
+        [loginEmail, normalizeEmail],
+        [registerEmail, normalizeEmail],
+        [forgotEmail, normalizeEmail]
+    ]);
+
+    authValidationState.fieldsByForm = new Map([
+        ['login', [loginEmail, loginPassword]],
+        ['register', [registerEmail, registerPassword]],
+        ['forgot', [forgotEmail]],
+        ['reset', [resetPassword]]
+    ]);
+
+    const allFields = Array.from(authValidationState.validators.keys()).filter(Boolean);
+    allFields.forEach((input) => {
+        input.addEventListener('blur', () => validateAuthField(input, { mutate: true }));
+        input.addEventListener('input', () => {
+            if (input.classList.contains('input-error')) {
+                validateAuthField(input, { mutate: false });
+            }
+        });
+    });
+
+    authValidationState.isReady = true;
+}
+
+function getAuthFieldValue(input, { mutate = false } = {}) {
+    if (!input) return '';
+    const raw = input.value || '';
+    const normalizer = authValidationState.normalizers.get(input);
+    const normalized = normalizer ? normalizer(raw) : raw;
+    if (mutate && normalized !== input.value) {
+        input.value = normalized;
+    }
+    return normalized;
+}
+
+function showAuthFieldError(input, message) {
+    if (!input) return;
+    const errorId = input.getAttribute('aria-describedby');
+    let errorEl = errorId ? document.getElementById(errorId) : null;
+    if (!errorEl && input.parentElement) {
+        errorEl = input.parentElement.querySelector('.field-error');
+    }
+    if (!errorEl) {
+        errorEl = document.createElement('small');
+        errorEl.className = 'field-error';
+        input.insertAdjacentElement('afterend', errorEl);
+    }
+    errorEl.textContent = message;
+    errorEl.classList.add('is-visible');
+    input.classList.add('input-error');
+    input.setAttribute('aria-invalid', 'true');
+}
+
+function clearAuthFieldError(input) {
+    if (!input) return;
+    const errorId = input.getAttribute('aria-describedby');
+    const errorEl = errorId ? document.getElementById(errorId) : input.parentElement?.querySelector('.field-error');
+    if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.remove('is-visible');
+    }
+    input.classList.remove('input-error');
+    input.removeAttribute('aria-invalid');
+}
+
+function validateAuthField(input, { mutate = false } = {}) {
+    if (!input || input.disabled) return true;
+    const validator = authValidationState.validators.get(input);
+    if (!validator) return true;
+    const value = getAuthFieldValue(input, { mutate });
+    const message = validator(value);
+    if (message) {
+        showAuthFieldError(input, message);
+        return false;
+    }
+    clearAuthFieldError(input);
+    return true;
+}
+
+function validateAuthForm(formKey) {
+    const fields = authValidationState.fieldsByForm.get(formKey) || [];
+    let firstInvalid = null;
+    fields.filter(Boolean).forEach((input) => {
+        const valid = validateAuthField(input, { mutate: true });
+        if (!valid && !firstInvalid) {
+            firstInvalid = input;
+        }
+    });
+    if (firstInvalid) {
+        firstInvalid.focus();
+        return false;
+    }
+    return true;
+}
+
+function clearAuthFieldErrors() {
+    const fields = Array.from(authValidationState.validators.keys()).filter(Boolean);
+    fields.forEach((input) => clearAuthFieldError(input));
 }
 
 async function handleAuthSubmit(type, formData) {
@@ -1098,14 +1266,142 @@ function setupEventListeners() {
     }
 
     if (contactForm) {
+        const contactName = document.getElementById('contactName');
+        const contactEmail = document.getElementById('contactEmail');
+        const contactSubject = document.getElementById('contactSubject');
+        const contactMessage = document.getElementById('contactMessage');
+
+        const normalizeSingleLine = (value) => value.replace(/\s+/g, ' ').trim();
+        const normalizeMessage = (value) => value.replace(/\r\n/g, '\n').trim();
+        const getNormalizedValue = (input) => {
+            if (!input) return '';
+            const raw = input.value || '';
+            if (input === contactMessage) return normalizeMessage(raw);
+            if (input === contactEmail) return raw.trim();
+            return normalizeSingleLine(raw);
+        };
+
+        const contactValidators = new Map([
+            [contactName, (value) => {
+                if (!value) return 'Please enter your full name.';
+                if (value.length < 2) return 'Name must be at least 2 characters.';
+                if (value.length > 60) return 'Name must be 60 characters or fewer.';
+                if (!/^[a-zA-Z\s.'-]+$/.test(value)) return 'Name can only include letters, spaces, and .\'- characters.';
+                const letterCount = value.replace(/[^a-zA-Z]/g, '').length;
+                if (letterCount < 2) return 'Please include at least two letters in your name.';
+                return '';
+            }],
+            [contactEmail, (value) => {
+                if (!value) return 'Please enter your email address.';
+                if (value.length > 254) return 'Email must be 254 characters or fewer.';
+                const parts = value.split('@');
+                if (parts.length !== 2) return 'Enter a valid email address.';
+                const [local, domain] = parts;
+                if (!local || !domain) return 'Enter a valid email address.';
+                if (local.length > 64) return 'Email local part must be 64 characters or fewer.';
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    return 'Enter a valid email address (e.g., name@example.com).';
+                }
+                return '';
+            }],
+            [contactSubject, (value) => {
+                if (!value) return 'Please enter a subject.';
+                if (value.length < 4) return 'Subject must be at least 4 characters.';
+                if (value.length > 100) return 'Subject must be 100 characters or fewer.';
+                if (!/[a-zA-Z0-9]/.test(value)) return 'Subject must include letters or numbers.';
+                return '';
+            }],
+            [contactMessage, (value) => {
+                if (!value) return 'Please enter a message.';
+                if (value.length < 10) return 'Message must be at least 10 characters.';
+                if (value.length > 1500) return 'Message must be 1500 characters or fewer.';
+                const wordCount = value.split(/\s+/).filter(Boolean).length;
+                if (wordCount < 2) return 'Please add a bit more detail.';
+                return '';
+            }]
+        ]);
+
+        const showFieldError = (input, message) => {
+            if (!input) return;
+            const errorId = input.getAttribute('aria-describedby');
+            let errorEl = errorId ? document.getElementById(errorId) : null;
+            if (!errorEl && input.parentElement) {
+                errorEl = input.parentElement.querySelector('.field-error');
+            }
+            if (!errorEl) {
+                errorEl = document.createElement('small');
+                errorEl.className = 'field-error';
+                input.insertAdjacentElement('afterend', errorEl);
+            }
+            errorEl.textContent = message;
+            errorEl.classList.add('is-visible');
+            input.classList.add('input-error');
+            input.setAttribute('aria-invalid', 'true');
+        };
+
+        const clearFieldError = (input) => {
+            if (!input) return;
+            const errorId = input.getAttribute('aria-describedby');
+            const errorEl = errorId ? document.getElementById(errorId) : input.parentElement?.querySelector('.field-error');
+            if (errorEl) {
+                errorEl.textContent = '';
+                errorEl.classList.remove('is-visible');
+            }
+            input.classList.remove('input-error');
+            input.removeAttribute('aria-invalid');
+        };
+
+        const validateField = (input, { mutate = false } = {}) => {
+            const validator = contactValidators.get(input);
+            if (!validator) return true;
+            let value = getNormalizedValue(input);
+            if (input === contactEmail && value) value = value.toLowerCase();
+            if (mutate && value !== input.value) {
+                input.value = value;
+            }
+            const message = validator(value);
+            if (message) {
+                showFieldError(input, message);
+                return false;
+            }
+            clearFieldError(input);
+            return true;
+        };
+
+        const validateContactForm = () => {
+            const fields = [contactName, contactEmail, contactSubject, contactMessage].filter(Boolean);
+            let firstInvalid = null;
+            fields.forEach((input) => {
+                const valid = validateField(input, { mutate: true });
+                if (!valid && !firstInvalid) {
+                    firstInvalid = input;
+                }
+            });
+            if (firstInvalid) {
+                firstInvalid.focus();
+                return false;
+            }
+            return true;
+        };
+
+        [contactName, contactEmail, contactSubject, contactMessage].filter(Boolean).forEach((input) => {
+            input.addEventListener('blur', () => validateField(input, { mutate: true }));
+            input.addEventListener('input', () => {
+                if (input.classList.contains('input-error')) {
+                    validateField(input, { mutate: false });
+                }
+            });
+        });
+
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(contactForm);
+            if (!validateContactForm()) return;
+
             const payload = {
-                name: formData.get('name'),
-                email: formData.get('email'),
-                subject: formData.get('subject'),
-                message: formData.get('message'),
+                name: getNormalizedValue(contactName),
+                email: getNormalizedValue(contactEmail).toLowerCase(),
+                subject: getNormalizedValue(contactSubject),
+                message: getNormalizedValue(contactMessage),
             };
 
             try {
@@ -1119,6 +1415,7 @@ function setupEventListeners() {
                     throw new Error(text || 'Failed');
                 }
                 contactForm.reset();
+                [contactName, contactEmail, contactSubject, contactMessage].forEach((input) => clearFieldError(input));
                 alert('Message sent successfully.');
             } catch (err) {
                 console.error('Contact submit failed:', err.message);
