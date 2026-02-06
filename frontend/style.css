@@ -1073,6 +1073,11 @@ body {
     color: var(--text-secondary);
 }
 
+.admin-note {
+    margin-top: 0;
+    font-size: 0.85rem;
+}
+
 .admin-form {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
