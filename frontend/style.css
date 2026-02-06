@@ -8,6 +8,7 @@
     --hover-color: #2a004f;
     --accent-color: #AED2FF;
     --teal-color: #AED2FF;
+    --section-divider-color: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -74,7 +75,9 @@ body {
 
 /* Navigation */
 .navbar {
-    background-color: var(--secondary-color);
+    background-color:#362f47;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 1rem 0;
     position: sticky;
     top: 0;
@@ -311,6 +314,32 @@ body {
 /* Movies Grid */
 .section {
     padding: 3rem 0;
+}
+
+.section-user {
+    background: #6E026F;
+}
+
+.section-featured {
+    background: #715a5a;
+}
+
+.section-value {
+    background: #1A3D64;
+}
+
+.section-legal {
+    background: #4f200d;
+}
+
+.section-admin {
+    background: #556B2F;
+}
+
+.section-divider {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, var(--section-divider-color), transparent);
 }
 
 .section-title {
@@ -553,7 +582,7 @@ body {
 
 /* Footer */
 .footer {
-    background: linear-gradient(135deg, #2a004f 0%, #1b0036 100%);
+    background: #511D43;
     padding: 3rem 0 1.2rem;
     margin-top: 2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
