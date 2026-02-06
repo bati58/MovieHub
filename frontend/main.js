@@ -65,6 +65,8 @@ const registerForm = document.getElementById('registerForm');
 const openResetTab = document.getElementById('openResetTab');
 const forgotForm = document.getElementById('forgotForm');
 const resetForm = document.getElementById('resetForm');
+const resetTokenInput = document.getElementById('resetTokenInput');
+const resetHint = document.getElementById('resetHint');
 const resetPanel = document.getElementById('resetPanel');
 const authMessage = document.getElementById('authMessage');
 const watchlistGrid = document.getElementById('watchlistGrid');
@@ -523,7 +525,12 @@ function displayMovieModal(movie) {
     if (watchlistToggle) {
         if (!userToken) {
             watchlistToggle.textContent = 'Login to Save';
-            watchlistToggle.disabled = true;
+            watchlistToggle.disabled = false;
+            watchlistToggle.addEventListener('click', () => {
+                movieModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                openAuthModal('login');
+            });
             if (watchlistNote) watchlistNote.textContent = 'Log in to add this movie to your watchlist.';
         } else {
             const isFav = userFavorites.has(movie._id);
@@ -556,7 +563,10 @@ function initUserAccount() {
         });
     }
     if (openResetTab) {
-        openResetTab.addEventListener('click', () => switchAuthTab('reset'));
+        openResetTab.addEventListener('click', () => {
+            switchAuthTab('reset');
+            updateResetState();
+        });
     }
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -588,13 +598,11 @@ function initUserAccount() {
         });
     }
 
+    updateResetState('');
     const resetToken = new URLSearchParams(window.location.search).get('reset');
     if (resetToken) {
         openAuthModal('reset');
-        if (resetForm) {
-            const tokenInput = resetForm.querySelector('input[name="token"]');
-            if (tokenInput) tokenInput.value = resetToken;
-        }
+        updateResetState(resetToken);
         const url = new URL(window.location.href);
         url.searchParams.delete('reset');
         window.history.replaceState({}, document.title, url.toString());
@@ -634,6 +642,29 @@ function switchAuthTab(tab) {
     if (registerForm) registerForm.classList.toggle('active', tab === 'register');
     if (resetPanel) resetPanel.classList.toggle('active', tab === 'reset');
     if (authMessage) authMessage.textContent = '';
+    if (tab === 'reset') {
+        updateResetState();
+    }
+}
+
+function updateResetState(tokenValue) {
+    if (!resetForm) return;
+    const currentToken = tokenValue !== undefined
+        ? tokenValue
+        : (resetTokenInput ? resetTokenInput.value : '');
+    const hasToken = Boolean(currentToken);
+
+    if (resetTokenInput) resetTokenInput.value = currentToken || '';
+    resetForm.dataset.ready = hasToken ? 'true' : 'false';
+    resetForm.querySelectorAll('input, button').forEach((control) => {
+        if (control === resetTokenInput) return;
+        control.disabled = !hasToken;
+    });
+    if (resetHint) {
+        resetHint.textContent = hasToken
+            ? 'Verified reset link detected. Set a new password below.'
+            : 'Open the reset link from your email to set a new password.';
+    }
 }
 
 async function handleAuthSubmit(type, formData) {
@@ -691,9 +722,14 @@ async function handleForgotSubmit(formData) {
 
 async function handleResetSubmit(formData) {
     if (!authMessage) return;
+    const tokenValue = String(formData.get('token') || '').trim();
+    if (!tokenValue) {
+        authMessage.textContent = 'Open the reset link from your email to continue.';
+        return;
+    }
     authMessage.textContent = 'Resetting password...';
     const payload = {
-        token: formData.get('token'),
+        token: tokenValue,
         password: formData.get('password')
     };
     try {
@@ -708,6 +744,7 @@ async function handleResetSubmit(formData) {
         }
         const data = await res.json();
         authMessage.textContent = data.message || 'Password reset successful. Please login.';
+        updateResetState('');
         switchAuthTab('login');
     } catch (err) {
         authMessage.textContent = err.message || 'Password reset failed';
@@ -739,6 +776,7 @@ function clearUserSession() {
     if (registerForm) registerForm.reset();
     if (forgotForm) forgotForm.reset();
     if (resetForm) resetForm.reset();
+    updateResetState('');
     if (authMessage) authMessage.textContent = '';
     renderMiniGrid([], watchlistGrid, watchlistEmpty, { emptyText: 'Log in to manage your watchlist.' });
     renderMiniGrid([], historyGrid, historyEmpty, { emptyText: 'Log in to see your recently viewed titles.' });
