@@ -4,30 +4,29 @@ const searchSuggestions = document.getElementById('searchSuggestions');
 
 let searchTimeout;
 
-// Search functionality
-searchInput.addEventListener('input', async (e) => {
-    const query = e.target.value.trim();
-    
-    if (query.length < 2) {
-        searchSuggestions.style.display = 'none';
-        return;
-    }
-    
-    clearTimeout(searchTimeout);
-    
-    searchTimeout = setTimeout(async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/movies/search/suggestions?q=${encodeURIComponent(query)}`);
-            if (!response.ok) throw new Error('Search failed');
-            const movies = await response.json();
-            
-            displaySearchSuggestions(movies);
-        } catch (error) {
-            console.error('Error fetching search suggestions:', error);
+// Search functionality - only attach if elements exist
+if (searchInput) {
+    searchInput.addEventListener('input', async (e) => {
+        const query = e.target.value.trim();
+        if (!searchSuggestions) return;
+        if (query.length < 2) {
             searchSuggestions.style.display = 'none';
+            return;
         }
-    }, 300);
-});
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/movies/search/suggestions?q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error('Search failed');
+                const movies = await response.json();
+                displaySearchSuggestions(movies);
+            } catch (error) {
+                console.error('Error fetching search suggestions:', error);
+                searchSuggestions.style.display = 'none';
+            }
+        }, 300);
+    });
+}
 
 // Display search suggestions
 function displaySearchSuggestions(movies) {
@@ -67,36 +66,53 @@ function displaySearchSuggestions(movies) {
 }
 
 // Search button click
-searchBtn.addEventListener('click', performSearch);
+if (searchBtn) searchBtn.addEventListener('click', performSearch);
 
 // Enter key for search
-searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        performSearch();
-    }
-});
+if (searchInput) {
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+}
 
 // Perform search
 async function performSearch(queryOverride) {
-    const query = (queryOverride || searchInput.value || '').trim();
-    
+    const query = (queryOverride || (searchInput && searchInput.value) || '').trim();
     if (!query) return;
-    
+
+    const onMoviesPage = window.location.pathname.endsWith('movies.html') || window.location.pathname.endsWith('/movies');
+    if (!onMoviesPage) {
+        // Redirect to movies page with query
+        window.location.href = `movies.html?search=${encodeURIComponent(query)}`;
+        return;
+    }
+
+    // If already on movies page, use catalog search flow
+    if (typeof catalogQuery !== 'undefined') {
+        catalogQuery = query;
+        catalogPage = 1;
+        loadCatalogMovies();
+        return;
+    }
+
+    // Fallback: show modal results
     try {
         const response = await fetch(`${API_BASE_URL}/movies?search=${encodeURIComponent(query)}`);
         const payload = await response.json();
         const movies = Array.isArray(payload) ? payload : (payload.items || []);
-        
+
         // Display search results in modal
         const modalContent = `
             <h2>Search Results for "${query}"</h2>
             <p>Found ${movies.length} movie(s)</p>
             <div class="movies-grid" id="searchResults"></div>
         `;
-        
+
         movieDetails.innerHTML = modalContent;
         const resultsContainer = document.getElementById('searchResults');
-        
+
         if (movies.length === 0) {
             resultsContainer.innerHTML = `
                 <div class="no-movies" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
@@ -108,10 +124,10 @@ async function performSearch(queryOverride) {
         } else {
             displayMovies(movies, resultsContainer);
         }
-        
+
         movieModal.style.display = 'block';
         document.body.style.overflow = 'hidden';
-        searchSuggestions.style.display = 'none';
+        if (searchSuggestions) searchSuggestions.style.display = 'none';
     } catch (error) {
         console.error('Error performing search:', error);
         alert('Search failed. Please ensure the backend is running at http://localhost:5000');

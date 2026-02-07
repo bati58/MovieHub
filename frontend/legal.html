@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieHub — Legal & Contact</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body data-page="legal">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">MovieHub</a>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="movies.html"><i class="fas fa-film"></i> Movies</a>
+                <div class="dropdown">
+                    <a href="#" class="dropbtn"><i class="fas fa-list"></i> Categories <i
+                            class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content" id="genreDropdown">
+                        <!-- Genres injected by JS -->
+                    </div>
+                </div>
+                <a href="trending.html"><i class="fas fa-fire"></i> Trending</a>
+                <a href="account.html"><i class="fas fa-user"></i> Account</a>
+                <a href="admin.html"><i class="fas fa-shield-halved"></i> Admin</a>
+            </div>
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search movies...">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div id="searchSuggestions" class="search-suggestions"></div>
+            </div>
+            <button class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Legal & Contact -->
+    <section class="section section-legal" id="legal">
+        <div class="container">
+            <h2 class="section-title">Legal & Contact</h2>
+            <div class="legal-grid">
+                <div id="terms" class="legal-card">
+                    <h3>Terms of Service</h3>
+                    <p>MovieHub provides movie metadata, trailers, and provider links. We do not host or distribute full
+                        movies.</p>
+                    <button class="legal-btn" data-legal="terms">Read Terms</button>
+                    <a class="legal-link" href="#" data-download="terms">Download Terms (PDF)</a>
+                </div>
+                <div id="privacy" class="legal-card">
+                    <h3>Privacy Policy</h3>
+                    <p>We do not sell personal data. Basic analytics may be used to improve the experience.</p>
+                    <button class="legal-btn" data-legal="privacy">Read Privacy</button>
+                    <a class="legal-link" href="#" data-download="privacy">Download Privacy (PDF)</a>
+                </div>
+                <div id="dmca" class="legal-card">
+                    <h3>DMCA</h3>
+                    <p>If you are a rights holder and believe content is listed in error, contact us to request removal.
+                    </p>
+                    <button class="legal-btn" data-legal="dmca">Read DMCA</button>
+                </div>
+                <div id="contact" class="legal-card">
+                    <h3>Contact</h3>
+                    <p>Email: batijano58@gmail.com</p>
+                    <p>For urgent requests, include “DMCA” in the subject.</p>
+                    <div class="contact-links">
+                        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=batijano58@gmail.com" target="_blank">
+                        <i class="fas fa-envelope"></i>Email</a>
+                        <a href="https://wa.me/251989977058" target="_blank" rel="noopener noreferrer"><i
+                                class="fab fa-whatsapp"></i> WhatsApp</a>
+                        <a href="https://t.me/CMY_TR" target="_blank" rel="noopener noreferrer"><i
+                                class="fab fa-telegram"></i> Telegram</a>
+                        <a href="https://instagram.com/bati_jano" target="_blank" rel="noopener noreferrer"><i
+                                class="fab fa-instagram"></i> Instagram</a>
+                    </div>
+                    <button class="legal-btn" data-legal="contact">Contact Us</button>
+                </div>
+            </div>
+            <div class="contact-form">
+                <h3>Send a Message</h3>
+                <form id="contactForm" novalidate>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <input type="text" id="contactName" name="name" placeholder="Your name" required
+                                autocomplete="name" aria-describedby="contactNameError">
+                            <small class="field-error" id="contactNameError" aria-live="polite"></small>
+                        </div>
+                        <div class="form-field">
+                            <input type="email" id="contactEmail" name="email" placeholder="Your email" required
+                                autocomplete="email" aria-describedby="contactEmailError">
+                            <small class="field-error" id="contactEmailError" aria-live="polite"></small>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <input type="text" id="contactSubject" name="subject" placeholder="Subject" required
+                            autocomplete="off" aria-describedby="contactSubjectError">
+                        <small class="field-error" id="contactSubjectError" aria-live="polite"></small>
+                    </div>
+                    <div class="form-field">
+                        <textarea id="contactMessage" name="message" rows="5" placeholder="Your message" required
+                            aria-describedby="contactMessageError"></textarea>
+                        <small class="field-error" id="contactMessageError" aria-live="polite"></small>
+                    </div>
+                    <button type="submit" class="legal-btn">Send Message</button>
+                </form>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 MovieHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="search.js"></script>
+</body>
+
+</html>

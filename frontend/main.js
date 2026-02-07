@@ -89,17 +89,42 @@ let userFavorites = new Set();
 let userHistory = [];
 let userEmail = '';
 // Load movies on page load
+function applyQueryToCatalog() {
+    if (!('URLSearchParams' in window)) return;
+    const params = new URLSearchParams(window.location.search);
+    const genre = params.get('genre');
+    const search = params.get('search');
+    const year = params.get('year');
+    const sort = params.get('sort');
+    const limit = params.get('limit');
+    const page = parseInt(params.get('page') || '1', 10) || 1;
+
+    if (genre && filterGenre) filterGenre.value = genre;
+    if (search) catalogQuery = search;
+    if (year && filterYear) filterYear.value = year;
+    if (sort && filterSort) filterSort.value = sort;
+    if (limit && filterLimit) filterLimit.value = limit;
+    catalogPage = page;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Page loaded, starting to fetch movies...');
-    loadFeaturedMovies();
-    loadTrendingMovies();
-    loadCatalogMovies();
-    loadGenres();
+    console.log('Page loaded, starting initialization...');
+
+    // Shared setup
+    if (filterGenre || genreDropdown || categoryGrid) loadGenres();
     setupEventListeners();
     setupScrollButtons();
     setupHeroSearch();
     setAdminStatus(Boolean(adminToken));
     initUserAccount();
+
+    // Page-specific loads
+    if (featuredMoviesGrid) loadFeaturedMovies();
+    if (trendingMoviesGrid) loadTrendingMovies();
+    if (catalogMoviesGrid) {
+        applyQueryToCatalog();
+        loadCatalogMovies();
+    }
 });
 
 // Improved fetch function with timeout and fallback
@@ -238,7 +263,7 @@ function populateGenres(genres) {
         genreDropdown.innerHTML = '';
         safeGenres.forEach(g => {
             const link = document.createElement('a');
-            link.href = '#catalog';
+            link.href = `movies.html?genre=${encodeURIComponent(g.name)}`;
             link.dataset.genre = g.name;
             link.textContent = `${g.name} (${g.count})`;
             genreDropdown.appendChild(link);
@@ -249,7 +274,7 @@ function populateGenres(genres) {
         categoryGrid.innerHTML = '';
         safeGenres.forEach(g => {
             const card = document.createElement('a');
-            card.href = '#catalog';
+            card.href = `movies.html?genre=${encodeURIComponent(g.name)}`;
             card.className = 'category-card';
             card.dataset.genre = g.name;
             const iconClass = iconMap[g.name] || 'fa-film';
@@ -1131,13 +1156,17 @@ function setupEventListeners() {
         genreDropdownEl.addEventListener('click', (e) => {
             const item = e.target.closest('a[data-genre]');
             if (!item) return;
-            e.preventDefault();
             const genre = item.dataset.genre;
-            if (filterGenre) filterGenre.value = genre;
-            catalogPage = 1;
-            loadCatalogMovies();
-            const dropdown = document.querySelector('.dropdown');
-            if (dropdown) dropdown.classList.remove('open');
+
+            // If we're on the movies page, intercept and filter in-place. Otherwise allow navigation.
+            if (catalogMoviesGrid) {
+                e.preventDefault();
+                if (filterGenre) filterGenre.value = genre;
+                catalogPage = 1;
+                loadCatalogMovies();
+                const dropdown = document.querySelector('.dropdown');
+                if (dropdown) dropdown.classList.remove('open');
+            }
         });
     }
 
@@ -1145,11 +1174,15 @@ function setupEventListeners() {
         categoryGridEl.addEventListener('click', (e) => {
             const item = e.target.closest('.category-card[data-genre]');
             if (!item) return;
-            e.preventDefault();
             const genre = item.dataset.genre;
-            if (filterGenre) filterGenre.value = genre;
-            catalogPage = 1;
-            loadCatalogMovies();
+
+            if (catalogMoviesGrid) {
+                e.preventDefault();
+                if (filterGenre) filterGenre.value = genre;
+                catalogPage = 1;
+                loadCatalogMovies();
+            }
+            // otherwise the anchor's href will navigate to the movies page
         });
     }
     

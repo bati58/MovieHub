@@ -13,14 +13,14 @@
         rel="stylesheet">
 </head>
 
-<body>
+<body data-page="home">
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
             <a href="index.html" class="logo">MovieHub</a>
             <div class="nav-links">
-                <a href="#top" class="active"><i class="fas fa-home"></i> Home</a>
-                <a href="#catalog"><i class="fas fa-film"></i> Movies</a>
+                <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+                <a href="movies.html"><i class="fas fa-film"></i> Movies</a>
                 <div class="dropdown">
                     <a href="#" class="dropbtn"><i class="fas fa-list"></i> Categories <i
                             class="fas fa-chevron-down"></i></a>
@@ -28,9 +28,9 @@
                         <!-- Genres injected by JS -->
                     </div>
                 </div>
-                <a href="#trending"><i class="fas fa-fire"></i> Trending</a>
-                <a href="#user"><i class="fas fa-user"></i> Account</a>
-                <a href="#admin-messages"><i class="fas fa-shield-halved"></i> Admin</a>
+                <a href="trending.html"><i class="fas fa-fire"></i> Trending</a>
+                <a href="account.html"><i class="fas fa-user"></i> Account</a>
+                <a href="admin.html"><i class="fas fa-shield-halved"></i> Admin</a>
             </div>
             <div class="search-container">
                 <div class="search-box">
@@ -85,33 +85,8 @@
     </section>
     <div class="section-divider" aria-hidden="true"></div>
 
-    <!-- User Space -->
-    <section class="section section-user" id="user">
-        <div class="container">
-            <h2 class="section-title">Your Space</h2>
-            <div class="user-panel">
-                <div class="user-card">
-                    <h3>Account</h3>
-                    <p id="userStatusText">Not logged in.</p>
-                    <div class="user-actions">
-                        <button id="openLoginModal" class="filter-btn">Login / Register</button>
-                        <button id="userLogoutBtn" class="filter-btn secondary">Logout</button>
-                    </div>
-                    <div class="user-meta" id="userMeta"></div>
-                </div>
-                <div class="user-card">
-                    <h3>Watchlist</h3>
-                    <div id="watchlistGrid" class="mini-grid"></div>
-                    <p class="form-note" id="watchlistEmpty">Log in to manage your watchlist.</p>
-                </div>
-                <div class="user-card">
-                    <h3>Recently Viewed</h3>
-                    <div id="historyGrid" class="mini-grid"></div>
-                    <p class="form-note" id="historyEmpty">Log in to see your recently viewed titles.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- User area moved to a dedicated page: account.html -->
+    <!-- User Space section removed from the homepage to simplify layout. -->
     <div class="section-divider" aria-hidden="true"></div>
 
     <!-- Browse Catalog -->
@@ -304,92 +279,8 @@
     </section>
     <div class="section-divider" aria-hidden="true"></div>
 
-    <!-- Admin Messages (local use) -->
-    <section class="section section-admin admin-section" id="admin-messages">
-        <div class="container">
-            <div class="admin-header">
-                <div>
-                    <h2 class="section-title">Admin Dashboard</h2>
-                    <p class="admin-subtitle">Local access for contact messages.</p>
-                </div>
-                <div class="admin-status">
-                    <span id="adminStatusBadge" class="status-badge">Logged out</span>
-                </div>
-            </div>
-            <div class="admin-controls">
-                <div class="admin-card admin-auth">
-                    <div class="admin-card-title">Access</div>
-                    <p class="form-note admin-note">Authorized admins only. Use the credentials configured on the server.</p>
-                    <div class="admin-form admin-form-auth">
-                        <input type="text" id="adminUserInput" placeholder="Admin username" autocomplete="username">
-                        <input type="password" id="adminPassInput" placeholder="Admin password" autocomplete="current-password">
-                        <button id="adminLoginBtn" class="filter-btn">Login</button>
-                        <button id="adminLogoutBtn" class="filter-btn secondary">Logout</button>
-                        <button id="loadMessagesBtn" class="filter-btn secondary">Load Messages</button>
-                        <button id="exportMessagesBtn" class="filter-btn">Export CSV</button>
-                    </div>
-                    <div class="admin-refresh">
-                        <label class="refresh-toggle">
-                            <input type="checkbox" id="adminAutoRefresh">
-                            <span>Auto-refresh every</span>
-                        </label>
-                        <select id="adminRefreshInterval">
-                            <option value="10">10s</option>
-                            <option value="20">20s</option>
-                            <option value="30" selected>30s</option>
-                            <option value="60">60s</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="admin-card admin-filter-card">
-                    <div class="admin-card-title">Filters</div>
-                    <div class="admin-form admin-form-filters">
-                        <input type="text" id="adminSearchInput" placeholder="Search messages...">
-                        <label>
-                            From
-                            <input type="date" id="adminDateFrom">
-                        </label>
-                        <label>
-                            To
-                            <input type="date" id="adminDateTo">
-                        </label>
-                        <button id="applyAdminFiltersBtn" class="filter-btn secondary">Apply Filters</button>
-                        <button id="clearAdminFiltersBtn" class="filter-btn">Clear Filters</button>
-                    </div>
-                    <div class="filter-presets">
-                        <button class="filter-btn secondary preset-btn" data-hours="24">Last 24 hours</button>
-                        <button class="filter-btn secondary preset-btn" data-days="7">Last 7 days</button>
-                        <button class="filter-btn secondary preset-btn" data-days="30">Last 30 days</button>
-                    </div>
-                </div>
-                <div class="admin-card admin-stats" id="adminStats">
-                    <div class="admin-card-title">Stats</div>
-                    <div class="admin-stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-label">Total</div>
-                            <div class="stat-value" id="statTotal">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Today</div>
-                            <div class="stat-value" id="statToday">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Last 7 days</div>
-                            <div class="stat-value" id="statWeek">0</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="messagesList" class="messages-list">
-                <p class="form-note">Log in to load and manage recent messages.</p>
-            </div>
-            <div class="pagination">
-                <button id="adminPrevPage" class="page-btn">Prev</button>
-                <span id="adminPageIndicator">Page 1</span>
-                <button id="adminNextPage" class="page-btn">Next</button>
-            </div>
-        </div>
-    </section>
+    <!-- Admin dashboard moved to a dedicated page: admin.html -->
+    <!-- Admin section removed from the homepage to keep the home page focused. -->
     <div class="section-divider" aria-hidden="true"></div>
 
     <!-- Footer -->
@@ -420,14 +311,14 @@
                 <div class="footer-section footer-links">
                     <h4>Quick Links</h4>
                     <div class="footer-link-grid">
-                        <a href="#top">Home</a>
-                        <a href="#catalog">Movies</a>
-                        <a href="#categories">Categories</a>
-                        <a href="#trending">Trending</a>
-                        <a href="#terms">Terms of Service</a>
-                        <a href="#privacy">Privacy Policy</a>
-                        <a href="#dmca">DMCA</a>
-                        <a href="#contact">Contact</a>
+                        <a href="index.html">Home</a>
+                        <a href="movies.html">Movies</a>
+                        <a href="categories.html">Categories</a>
+                        <a href="trending.html">Trending</a>
+                        <a href="legal.html#terms">Terms of Service</a>
+                        <a href="legal.html#privacy">Privacy Policy</a>
+                        <a href="legal.html#dmca">DMCA</a>
+                        <a href="legal.html#contact">Contact</a>
                     </div>
                 </div>
                 <div class="footer-section footer-connect">

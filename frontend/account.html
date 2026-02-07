@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieHub — Account</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body data-page="account">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">MovieHub</a>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="movies.html"><i class="fas fa-film"></i> Movies</a>
+                <div class="dropdown">
+                    <a href="#" class="dropbtn"><i class="fas fa-list"></i> Categories <i
+                            class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content" id="genreDropdown">
+                        <!-- Genres injected by JS -->
+                    </div>
+                </div>
+                <a href="trending.html"><i class="fas fa-fire"></i> Trending</a>
+                <a href="account.html" class="active"><i class="fas fa-user"></i> Account</a>
+                <a href="admin.html"><i class="fas fa-shield-halved"></i> Admin</a>
+            </div>
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search movies...">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div id="searchSuggestions" class="search-suggestions"></div>
+            </div>
+            <button class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <section class="section section-user" id="user">
+        <div class="container">
+            <h2 class="section-title">Your Space</h2>
+            <div class="user-panel">
+                <div class="user-card">
+                    <h3>Account</h3>
+                    <p id="userStatusText">Not logged in.</p>
+                    <div class="user-actions">
+                        <button id="openLoginModal" class="filter-btn">Login / Register</button>
+                        <button id="userLogoutBtn" class="filter-btn secondary">Logout</button>
+                    </div>
+                    <div class="user-meta" id="userMeta"></div>
+                </div>
+                <div class="user-card">
+                    <h3>Watchlist</h3>
+                    <div id="watchlistGrid" class="mini-grid"></div>
+                    <p class="form-note" id="watchlistEmpty">Log in to manage your watchlist.</p>
+                </div>
+                <div class="user-card">
+                    <h3>Recently Viewed</h3>
+                    <div id="historyGrid" class="mini-grid"></div>
+                    <p class="form-note" id="historyEmpty">Log in to see your recently viewed titles.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Movie Modal -->
+    <div id="movieModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="movieDetails">
+                <!-- Movie details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Legal Modal -->
+    <div id="legalModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeLegalModal">&times;</span>
+            <div id="legalDetails">
+                <!-- Legal details injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content auth-modal">
+            <span class="close-modal" id="closeAuthModal">&times;</span>
+            <div class="auth-header">
+                <h2>Account</h2>
+                <p class="auth-subtitle">Secure access to your watchlist and history.</p>
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-auth="login">Login</button>
+                    <button class="auth-tab" data-auth="register">Register</button>
+                    <button class="auth-tab" data-auth="reset">Reset</button>
+                </div>
+            </div>
+            <p class="form-note auth-message" id="authMessage"></p>
+            <div class="auth-panels">
+                <form id="loginForm" class="auth-form active" novalidate>
+                    <div class="auth-form-header">
+                        <h3>Welcome back</h3>
+                        <p>Sign in to manage your watchlist and viewing history.</p>
+                    </div>
+                    <div class="form-field">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" name="email" placeholder="you@example.com" required
+                            autocomplete="username" aria-describedby="loginEmailError">
+                        <small class="field-error" id="loginEmailError" aria-live="polite"></small>
+                    </div>
+                    <div class="form-field">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" name="password" placeholder="Your password" required
+                            autocomplete="current-password" aria-describedby="loginPasswordError">
+                        <small class="field-error" id="loginPasswordError" aria-live="polite"></small>
+                    </div>
+                    <div class="auth-actions">
+                        <button type="submit" class="filter-btn">Sign in</button>
+                        <button type="button" id="openResetTab" class="filter-btn secondary">Forgot password?</button>
+                    </div>
+                </form>
+                <form id="registerForm" class="auth-form" novalidate>
+                    <div class="auth-form-header">
+                        <h3>Create your account</h3>
+                        <p>Use an email and password to save favorites across sessions.</p>
+                    </div>
+                    <div class="form-field">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" name="email" placeholder="you@example.com" required
+                            autocomplete="email" aria-describedby="registerEmailError">
+                        <small class="field-error" id="registerEmailError" aria-live="polite"></small>
+                    </div>
+                    <div class="form-field">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" name="password" placeholder="Create a password"
+                            required autocomplete="new-password" aria-describedby="registerPasswordError">
+                        <small class="field-error" id="registerPasswordError" aria-live="polite"></small>
+                    </div>
+                    <button type="submit" class="filter-btn">Create account</button>
+                </form>
+                <div id="resetPanel" class="auth-form">
+                    <div class="reset-stack">
+                        <div class="reset-card">
+                            <h4>Request a reset link</h4>
+                            <p class="form-note">We will email a secure link that expires in 30 minutes.</p>
+                            <form id="forgotForm" class="auth-form inner" novalidate>
+                                <div class="form-field">
+                                    <label for="forgotEmail">Email</label>
+                                    <input type="email" id="forgotEmail" name="email" placeholder="you@example.com"
+                                        required autocomplete="email" aria-describedby="forgotEmailError">
+                                    <small class="field-error" id="forgotEmailError" aria-live="polite"></small>
+                                </div>
+                                <button type="submit" class="filter-btn">Send reset link</button>
+                            </form>
+                        </div>
+                        <div class="reset-card">
+                            <h4>Set a new password</h4>
+                            <p class="form-note" id="resetHint">Open the email link to continue.</p>
+                            <form id="resetForm" class="auth-form inner" data-ready="false" novalidate>
+                                <input type="hidden" name="token" id="resetTokenInput" autocomplete="off">
+                                <div class="form-field">
+                                    <label for="resetPassword">New password</label>
+                                    <input type="password" id="resetPassword" name="password"
+                                        placeholder="New password" required autocomplete="new-password"
+                                        aria-describedby="resetPasswordError">
+                                    <small class="field-error" id="resetPasswordError" aria-live="polite"></small>
+                                </div>
+                                <button type="submit" class="filter-btn">Update password</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 MovieHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="search.js"></script>
+</body>
+
+</html>
