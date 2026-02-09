@@ -1,9 +1,9 @@
 ﻿:root {
-    --primary-color: #9400FF;
-    --secondary-color: #27005D;
+    --primary-color: #3F9AAE;
+    --secondary-color: #BBE0EF;
     --text-color: #E4F1FF;
     --text-secondary: #AED2FF;
-    --bg-color: #27005D;
+    --bg-color: #1B3C53;
     --card-bg: #1d0036;
     --hover-color: #2a004f;
     --accent-color: #AED2FF;
@@ -317,11 +317,11 @@ body {
 }
 
 .section-user {
-    background: #6E026F;
+    background: #533353;
 }
 
 .section-featured {
-    background: #715a5a;
+    background: #5f5050;
 }
 
 .section-value {
@@ -329,11 +329,11 @@ body {
 }
 
 .section-legal {
-    background: #4b2a1a;
+    background: #6d5345;
 }
 
 .section-admin {
-    background: #556B2F;
+    background: #606b4e;
 }
 
 .section-divider {
@@ -582,8 +582,8 @@ body {
 
 /* Footer */
 .footer {
-    background: #511D43;
-    padding: 2.2rem 0 0.9rem;
+    background: #692c56;
+    padding: 3.0rem 0 2.5rem;
     margin-top: 1.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
