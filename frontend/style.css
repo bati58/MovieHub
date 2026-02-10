@@ -1127,7 +1127,7 @@ body {
 
 .contact-form {
     margin-top: 2rem;
-    background: var(--card-bg);
+    background: #2f4e5d;
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 12px;
     padding: 1.5rem;
@@ -1205,6 +1205,15 @@ body {
     min-width: 180px;
     margin: 0.75rem auto 0;
     display: block;
+    background: #E07A5F;
+    box-shadow: 0 10px 20px rgba(224, 122, 95, 0.25);
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-form button.legal-btn:hover {
+    background: #F2A65A;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(242, 166, 90, 0.3);
 }
 
 @media (max-width: 640px) {

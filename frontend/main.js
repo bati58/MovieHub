@@ -11,7 +11,7 @@ const featuredMoviesGrid = document.getElementById('featuredMovies');
 const trendingMoviesGrid = document.getElementById('trendingMovies');
 const catalogMoviesGrid = document.getElementById('catalogMovies');
 const movieModal = document.getElementById('movieModal');
-const closeModal = document.querySelector('.close-modal');
+const closeModal = movieModal ? movieModal.querySelector('.close-modal') : null;
 const movieDetails = document.getElementById('movieDetails');
 const filterGenre = document.getElementById('filterGenre');
 const filterYear = document.getElementById('filterYear');
@@ -107,10 +107,29 @@ function applyQueryToCatalog() {
     catalogPage = page;
 }
 
+function ensureYearOptions() {
+    if (!filterYear) return;
+    const hasYearOption = Array.from(filterYear.options || []).some(option => {
+        const value = option.value || option.textContent || '';
+        return /^\d{4}$/.test(value.trim());
+    });
+    if (hasYearOption) return;
+
+    const startYear = new Date().getFullYear();
+    const endYear = 2010;
+    for (let year = startYear; year >= endYear; year -= 1) {
+        const option = document.createElement('option');
+        option.value = String(year);
+        option.textContent = String(year);
+        filterYear.appendChild(option);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Page loaded, starting initialization...');
 
     // Shared setup
+    ensureYearOptions();
     if (filterGenre || genreDropdown || categoryGrid) loadGenres();
     setupEventListeners();
     setupScrollButtons();
@@ -1164,6 +1183,13 @@ function setupEventListeners() {
                 if (filterGenre) filterGenre.value = genre;
                 catalogPage = 1;
                 loadCatalogMovies();
+                const catalogSection = document.getElementById('catalog');
+                if (catalogSection) {
+                    const navBar = document.querySelector('.navbar');
+                    const offset = navBar ? navBar.offsetHeight : 0;
+                    const top = catalogSection.getBoundingClientRect().top + window.scrollY;
+                    window.scrollTo({ top: Math.max(0, top - offset), behavior: 'smooth' });
+                }
                 const dropdown = document.querySelector('.dropdown');
                 if (dropdown) dropdown.classList.remove('open');
             }
@@ -1181,6 +1207,13 @@ function setupEventListeners() {
                 if (filterGenre) filterGenre.value = genre;
                 catalogPage = 1;
                 loadCatalogMovies();
+                const catalogSection = document.getElementById('catalog');
+                if (catalogSection) {
+                    const navBar = document.querySelector('.navbar');
+                    const offset = navBar ? navBar.offsetHeight : 0;
+                    const top = catalogSection.getBoundingClientRect().top + window.scrollY;
+                    window.scrollTo({ top: Math.max(0, top - offset), behavior: 'smooth' });
+                }
             }
             // otherwise the anchor's href will navigate to the movies page
         });
@@ -1202,7 +1235,7 @@ function setupEventListeners() {
                 navLinks.style.top = '100%';
                 navLinks.style.left = '0';
                 navLinks.style.right = '0';
-                navLinks.style.background = 'var(--secondary-color)';
+                navLinks.style.background = 'var(--card-bg)';
                 navLinks.style.padding = '1rem';
                 navLinks.style.zIndex = '1000';
             }
