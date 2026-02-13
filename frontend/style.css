@@ -1546,6 +1546,12 @@ a {
     align-items: end;
 }
 
+.admin-form input,
+.admin-form select {
+    width: 100%;
+    min-width: 0;
+}
+
 .admin-form label {
     color: var(--mh-muted);
     display: grid;
@@ -1563,8 +1569,12 @@ a {
     font-size: 0.8rem;
 }
 
+.admin-form-auth {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .admin-form-auth .admin-field {
-    min-width: 180px;
+    min-width: 0;
 }
 
 .admin-form-auth .filter-btn {
