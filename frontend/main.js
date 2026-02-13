@@ -206,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     setupScrollButtons();
     setupHeroSearch();
+    setupHeroParallax();
     setAdminStatus(Boolean(adminToken));
     initUserAccount();
 
@@ -1882,6 +1883,41 @@ function setupHeroSearch() {
             heroBtn.click();
         }
     });
+}
+
+function setupHeroParallax() {
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
+    const heroMedia = hero.querySelector('.hero-media');
+    if (!heroMedia) return;
+
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    let rafId = null;
+    const updateParallax = () => {
+        const rect = hero.getBoundingClientRect();
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+        const inView = rect.bottom > 0 && rect.top < viewportHeight;
+        if (!inView) {
+            hero.style.setProperty('--hero-parallax-y', '0px');
+            return;
+        }
+        const offset = Math.max(-20, Math.min(20, rect.top * -0.08));
+        hero.style.setProperty('--hero-parallax-y', `${offset.toFixed(2)}px`);
+    };
+
+    const queueUpdate = () => {
+        if (rafId !== null) return;
+        rafId = window.requestAnimationFrame(() => {
+            updateParallax();
+            rafId = null;
+        });
+    };
+
+    window.addEventListener('scroll', queueUpdate, { passive: true });
+    window.addEventListener('resize', queueUpdate, { passive: true });
+    queueUpdate();
 }
 
 function setupScrollButtons() {
