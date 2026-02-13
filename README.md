@@ -1,7 +1,5 @@
 # MovieHub
 
-![MovieHub](frontend/screenshot.png)
-
 Live Demo: [view project](https://moviehub-xpqp.onrender.com)
 
 MovieHub is a full-stack movie discovery app that pulls real metadata from TMDB and serves a fast, single-page UI for browsing, search, and watchlist features.
