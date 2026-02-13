@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MovieHub - Discover Movies and Where to Watch</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link
@@ -15,7 +16,7 @@
 
 <body data-page="home">
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark moviehub-navbar sticky-top">
         <div class="container">
             <a href="index.html" class="logo">MovieHub</a>
             <div class="nav-links">
@@ -33,13 +34,13 @@
                 <a href="admin.html"><i class="fas fa-shield-halved"></i> Admin</a>
             </div>
             <div class="search-container">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Search movies...">
+                <div class="search-box input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search movies...">
                     <button id="searchBtn"><i class="fas fa-search"></i></button>
                 </div>
                 <div id="searchSuggestions" class="search-suggestions"></div>
             </div>
-            <button class="menu-toggle">
+            <button class="menu-toggle navbar-toggler" type="button" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
@@ -145,7 +146,7 @@
                         <option value="popular">Most Viewed</option>
                         <option value="rating">Top Rated</option>
                         <option value="year">Newest Year</option>
-                        <option value="title">A–Z</option>
+                        <option value="title">A-Z</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -232,7 +233,7 @@
                 <div id="contact" class="legal-card">
                     <h3>Contact</h3>
                     <p>Email: batijano58@gmail.com</p>
-                    <p>For urgent requests, include “DMCA” in the subject.</p>
+                    <p>For urgent requests, include "DMCA" in the subject.</p>
                     <div class="contact-links">
                         <a href="https://mail.google.com/mail/?view=cm&fs=1&to=batijano58@gmail.com" target="_blank">
                         <i class="fas fa-envelope"></i>Email</a>
@@ -251,26 +252,27 @@
                 <form id="contactForm" novalidate>
                     <div class="form-row">
                         <div class="form-field">
-                            <input type="text" id="contactName" name="name" placeholder="Your name" required
+                            <input type="text" id="contactName" name="name" placeholder="Your name" required minlength="2" maxlength="60" pattern="[A-Za-z\s.'-]{2,60}"
                                 autocomplete="name" aria-describedby="contactNameError">
                             <small class="field-error" id="contactNameError" aria-live="polite"></small>
                         </div>
                         <div class="form-field">
-                            <input type="email" id="contactEmail" name="email" placeholder="Your email" required
+                            <input type="email" id="contactEmail" name="email" placeholder="Your email" required maxlength="254"
                                 autocomplete="email" aria-describedby="contactEmailError">
                             <small class="field-error" id="contactEmailError" aria-live="polite"></small>
                         </div>
                     </div>
                     <div class="form-field">
-                        <input type="text" id="contactSubject" name="subject" placeholder="Subject" required
+                        <input type="text" id="contactSubject" name="subject" placeholder="Subject" required minlength="4" maxlength="100"
                             autocomplete="off" aria-describedby="contactSubjectError">
                         <small class="field-error" id="contactSubjectError" aria-live="polite"></small>
                     </div>
                     <div class="form-field">
-                        <textarea id="contactMessage" name="message" rows="5" placeholder="Your message" required
+                        <textarea id="contactMessage" name="message" rows="5" placeholder="Your message" required minlength="10" maxlength="1500"
                             aria-describedby="contactMessageError"></textarea>
                         <small class="field-error" id="contactMessageError" aria-live="polite"></small>
                     </div>
+                    <p class="form-note contact-feedback" id="contactFeedback" aria-live="polite"></p>
                     <button type="submit" class="legal-btn">Send Message</button>
                 </form>
 
@@ -344,7 +346,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 MovieHub. All rights reserved.</p>
+                <p>&copy; MovieHub. All rights reserved.</p>
 
             </div>
         </div>
@@ -392,13 +394,13 @@
                     </div>
                     <div class="form-field">
                         <label for="loginEmail">Email</label>
-                        <input type="email" id="loginEmail" name="email" placeholder="you@example.com" required
+                        <input type="email" id="loginEmail" name="email" placeholder="you@example.com" required maxlength="254"
                             autocomplete="username" aria-describedby="loginEmailError">
                         <small class="field-error" id="loginEmailError" aria-live="polite"></small>
                     </div>
                     <div class="form-field">
                         <label for="loginPassword">Password</label>
-                        <input type="password" id="loginPassword" name="password" placeholder="Your password" required
+                        <input type="password" id="loginPassword" name="password" placeholder="Your password" required maxlength="128"
                             autocomplete="current-password" aria-describedby="loginPasswordError">
                         <small class="field-error" id="loginPasswordError" aria-live="polite"></small>
                     </div>
@@ -414,14 +416,13 @@
                     </div>
                     <div class="form-field">
                         <label for="registerEmail">Email</label>
-                        <input type="email" id="registerEmail" name="email" placeholder="you@example.com" required
+                        <input type="email" id="registerEmail" name="email" placeholder="you@example.com" required maxlength="254"
                             autocomplete="email" aria-describedby="registerEmailError">
                         <small class="field-error" id="registerEmailError" aria-live="polite"></small>
                     </div>
                     <div class="form-field">
                         <label for="registerPassword">Password</label>
-                        <input type="password" id="registerPassword" name="password" placeholder="Create a password"
-                            required autocomplete="new-password" aria-describedby="registerPasswordError">
+                        <input type="password" id="registerPassword" name="password" placeholder="Create a password" required minlength="8" maxlength="72" pattern="(?=.*[A-Za-z])(?=.*\d).{8,72}" title="Use 8-72 characters with at least one letter and one number" autocomplete="new-password" aria-describedby="registerPasswordError">
                         <small class="field-error" id="registerPasswordError" aria-live="polite"></small>
                     </div>
                     <button type="submit" class="filter-btn">Create account</button>
@@ -434,7 +435,7 @@
                             <form id="forgotForm" class="auth-form inner" novalidate>
                                 <div class="form-field">
                                     <label for="forgotEmail">Email</label>
-                                    <input type="email" id="forgotEmail" name="email" placeholder="you@example.com"
+                                    <input type="email" id="forgotEmail" name="email" placeholder="you@example.com" maxlength="254"
                                         required autocomplete="email" aria-describedby="forgotEmailError">
                                     <small class="field-error" id="forgotEmailError" aria-live="polite"></small>
                                 </div>
@@ -448,8 +449,7 @@
                                 <input type="hidden" name="token" id="resetTokenInput" autocomplete="off">
                                 <div class="form-field">
                                     <label for="resetPassword">New password</label>
-                                    <input type="password" id="resetPassword" name="password"
-                                        placeholder="New password" required autocomplete="new-password"
+                                    <input type="password" id="resetPassword" name="password" placeholder="New password" required minlength="8" maxlength="72" pattern="(?=.*[A-Za-z])(?=.*\d).{8,72}" title="Use 8-72 characters with at least one letter and one number" autocomplete="new-password"
                                         aria-describedby="resetPasswordError">
                                     <small class="field-error" id="resetPasswordError" aria-live="polite"></small>
                                 </div>
@@ -468,8 +468,11 @@
     </button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="main.js"></script>
     <script src="search.js"></script>
 </body>
 
 </html>
+
+

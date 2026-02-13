@@ -43,6 +43,7 @@ const adminPrevPage = document.getElementById('adminPrevPage');
 const adminNextPage = document.getElementById('adminNextPage');
 const adminPageIndicator = document.getElementById('adminPageIndicator');
 const adminStatusBadge = document.getElementById('adminStatusBadge');
+const adminFeedback = document.getElementById('adminFeedback');
 const adminSearchInput = document.getElementById('adminSearchInput');
 const adminAutoRefresh = document.getElementById('adminAutoRefresh');
 const adminRefreshInterval = document.getElementById('adminRefreshInterval');
@@ -80,6 +81,8 @@ let adminTotal = 0;
 let adminItemsCache = [];
 let adminRefreshTimer = null;
 const legalDownloadLinks = document.querySelectorAll('.legal-link[data-download]');
+const ADMIN_USER_MAX_LENGTH = 64;
+const ADMIN_PASS_MAX_LENGTH = 256;
 
 let catalogPage = 1;
 let catalogQuery = '';
@@ -88,6 +91,74 @@ let userToken = localStorage.getItem('user_token') || '';
 let userFavorites = new Set();
 let userHistory = [];
 let userEmail = '';
+const THEME_STORAGE_KEY = 'moviehub_theme';
+let currentTheme = 'dark';
+
+function getStoredTheme() {
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+        return storedTheme;
+    }
+    const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+    return prefersLight ? 'light' : 'dark';
+}
+
+function updateThemeToggleLabel() {
+    const themeToggle = document.getElementById('themeToggle');
+    if (!themeToggle) return;
+    const isLight = currentTheme === 'light';
+    const actionLabel = isLight ? 'Switch to dark mode' : 'Switch to light mode';
+    themeToggle.innerHTML = `<i class="fas ${isLight ? 'fa-moon' : 'fa-sun'}" aria-hidden="true"></i>`;
+    themeToggle.setAttribute('aria-pressed', isLight ? 'true' : 'false');
+    themeToggle.setAttribute('aria-label', actionLabel);
+    themeToggle.setAttribute('title', actionLabel);
+}
+
+function applyTheme(theme, persist = true) {
+    currentTheme = theme === 'light' ? 'light' : 'dark';
+    if (document.body) {
+        document.body.setAttribute('data-theme', currentTheme);
+    }
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    if (persist) {
+        localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
+    }
+    updateThemeToggleLabel();
+}
+
+function ensureThemeToggleButton() {
+    const navContainer = document.querySelector('.moviehub-navbar .container') || document.querySelector('.navbar .container');
+    if (!navContainer) return null;
+
+    let themeToggle = document.getElementById('themeToggle');
+    if (!themeToggle) {
+        themeToggle = document.createElement('button');
+        themeToggle.type = 'button';
+        themeToggle.id = 'themeToggle';
+        themeToggle.className = 'theme-toggle';
+        themeToggle.setAttribute('aria-label', 'Toggle color theme');
+
+        const menuToggle = navContainer.querySelector('.menu-toggle');
+        if (menuToggle) {
+            navContainer.insertBefore(themeToggle, menuToggle);
+        } else {
+            navContainer.appendChild(themeToggle);
+        }
+    }
+    return themeToggle;
+}
+
+function setupThemeToggle() {
+    applyTheme(getStoredTheme(), false);
+    const themeToggle = ensureThemeToggleButton();
+    if (!themeToggle) return;
+
+    updateThemeToggleLabel();
+    themeToggle.addEventListener('click', () => {
+        const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+        applyTheme(nextTheme);
+    });
+}
 // Load movies on page load
 function applyQueryToCatalog() {
     if (!('URLSearchParams' in window)) return;
@@ -129,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Page loaded, starting initialization...');
 
     // Shared setup
+    setupThemeToggle();
     ensureYearOptions();
     if (filterGenre || genreDropdown || categoryGrid) loadGenres();
     setupEventListeners();
@@ -672,7 +744,7 @@ function openAuthModal(defaultTab = 'login') {
     if (!authModal) return;
     authModal.style.display = 'block';
     document.body.style.overflow = 'hidden';
-    if (authMessage) authMessage.textContent = '';
+    setAuthMessage('');
     switchAuthTab(defaultTab);
 }
 
@@ -691,7 +763,7 @@ function switchAuthTab(tab) {
     if (loginForm) loginForm.classList.toggle('active', tab === 'login');
     if (registerForm) registerForm.classList.toggle('active', tab === 'register');
     if (resetPanel) resetPanel.classList.toggle('active', tab === 'reset');
-    if (authMessage) authMessage.textContent = '';
+    setAuthMessage('');
     clearAuthFieldErrors();
     if (tab === 'reset') {
         updateResetState();
@@ -879,9 +951,26 @@ function clearAuthFieldErrors() {
     fields.forEach((input) => clearAuthFieldError(input));
 }
 
-async function handleAuthSubmit(type, formData) {
+function setAuthMessage(message = '', state = 'info') {
     if (!authMessage) return;
-    authMessage.textContent = 'Processing...';
+    authMessage.textContent = message;
+    authMessage.classList.remove('is-visible', 'is-info', 'is-success', 'is-error');
+    if (!message) return;
+    authMessage.classList.add('is-visible');
+    authMessage.classList.add(state === 'success' ? 'is-success' : state === 'error' ? 'is-error' : 'is-info');
+}
+
+function setAdminFeedback(message = '', state = 'info') {
+    if (!adminFeedback) return;
+    adminFeedback.textContent = message;
+    adminFeedback.classList.remove('is-visible', 'is-info', 'is-success', 'is-error');
+    if (!message) return;
+    adminFeedback.classList.add('is-visible');
+    adminFeedback.classList.add(state === 'success' ? 'is-success' : state === 'error' ? 'is-error' : 'is-info');
+}
+
+async function handleAuthSubmit(type, formData) {
+    setAuthMessage('Processing...', 'info');
     const payload = {
         email: formData.get('email'),
         password: formData.get('password')
@@ -905,15 +994,14 @@ async function handleAuthSubmit(type, formData) {
         await loadUserFavorites();
         await loadUserHistory();
         closeAuthModalView();
-        authMessage.textContent = '';
+        setAuthMessage('');
     } catch (err) {
-        authMessage.textContent = err.message || 'Authentication failed';
+        setAuthMessage(err.message || 'Authentication failed', 'error');
     }
 }
 
 async function handleForgotSubmit(formData) {
-    if (!authMessage) return;
-    authMessage.textContent = 'Sending reset link...';
+    setAuthMessage('Sending reset link...', 'info');
     const payload = { email: formData.get('email') };
     try {
         const res = await fetch(`${API_BASE_URL}/auth/forgot`, {
@@ -926,20 +1014,19 @@ async function handleForgotSubmit(formData) {
             throw new Error(text || 'Request failed');
         }
         const data = await res.json();
-        authMessage.textContent = data.message || 'If that email exists, a reset link was sent.';
+        setAuthMessage(data.message || 'If that email exists, a reset link was sent.', 'success');
     } catch (err) {
-        authMessage.textContent = err.message || 'Reset request failed';
+        setAuthMessage(err.message || 'Reset request failed', 'error');
     }
 }
 
 async function handleResetSubmit(formData) {
-    if (!authMessage) return;
     const tokenValue = String(formData.get('token') || '').trim();
     if (!tokenValue) {
-        authMessage.textContent = 'Open the reset link from your email to continue.';
+        setAuthMessage('Open the reset link from your email to continue.', 'error');
         return;
     }
-    authMessage.textContent = 'Resetting password...';
+    setAuthMessage('Resetting password...', 'info');
     const payload = {
         token: tokenValue,
         password: formData.get('password')
@@ -955,11 +1042,11 @@ async function handleResetSubmit(formData) {
             throw new Error(text || 'Request failed');
         }
         const data = await res.json();
-        authMessage.textContent = data.message || 'Password reset successful. Please login.';
+        setAuthMessage(data.message || 'Password reset successful. Please login.', 'success');
         updateResetState('');
         switchAuthTab('login');
     } catch (err) {
-        authMessage.textContent = err.message || 'Password reset failed';
+        setAuthMessage(err.message || 'Password reset failed', 'error');
     }
 }
 
@@ -989,7 +1076,7 @@ function clearUserSession() {
     if (forgotForm) forgotForm.reset();
     if (resetForm) resetForm.reset();
     updateResetState('');
-    if (authMessage) authMessage.textContent = '';
+    setAuthMessage('');
     renderMiniGrid([], watchlistGrid, watchlistEmpty, { emptyText: 'Log in to manage your watchlist.' });
     renderMiniGrid([], historyGrid, historyEmpty, { emptyText: 'Log in to see your recently viewed titles.' });
     syncFavoriteBadges();
@@ -1336,6 +1423,8 @@ function setupEventListeners() {
         const contactEmail = document.getElementById('contactEmail');
         const contactSubject = document.getElementById('contactSubject');
         const contactMessage = document.getElementById('contactMessage');
+        const contactFeedback = document.getElementById('contactFeedback');
+        const contactSubmitBtn = contactForm.querySelector('button[type="submit"]');
 
         const normalizeSingleLine = (value) => value.replace(/\s+/g, ' ').trim();
         const normalizeMessage = (value) => value.replace(/\r\n/g, '\n').trim();
@@ -1386,6 +1475,15 @@ function setupEventListeners() {
                 return '';
             }]
         ]);
+
+        const setContactFeedback = (message = '', state = 'info') => {
+            if (!contactFeedback) return;
+            contactFeedback.textContent = message;
+            contactFeedback.classList.remove('is-visible', 'is-info', 'is-success', 'is-error');
+            if (!message) return;
+            contactFeedback.classList.add('is-visible');
+            contactFeedback.classList.add(state === 'success' ? 'is-success' : state === 'error' ? 'is-error' : 'is-info');
+        };
 
         const showFieldError = (input, message) => {
             if (!input) return;
@@ -1444,9 +1542,11 @@ function setupEventListeners() {
                 }
             });
             if (firstInvalid) {
+                setContactFeedback('Please fix the highlighted fields and try again.', 'error');
                 firstInvalid.focus();
                 return false;
             }
+            setContactFeedback('');
             return true;
         };
 
@@ -1456,12 +1556,17 @@ function setupEventListeners() {
                 if (input.classList.contains('input-error')) {
                     validateField(input, { mutate: false });
                 }
+                if (contactFeedback?.classList.contains('is-error')) {
+                    setContactFeedback('');
+                }
             });
         });
 
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!validateContactForm()) return;
+            if (contactSubmitBtn) contactSubmitBtn.disabled = true;
+            setContactFeedback('Sending your message...', 'info');
 
             const payload = {
                 name: getNormalizedValue(contactName),
@@ -1482,10 +1587,12 @@ function setupEventListeners() {
                 }
                 contactForm.reset();
                 [contactName, contactEmail, contactSubject, contactMessage].forEach((input) => clearFieldError(input));
-                alert('Message sent successfully.');
+                setContactFeedback('Message sent successfully. Thank you for reaching out.', 'success');
             } catch (err) {
                 console.error('Contact submit failed:', err.message);
-                alert('Could not send message. Please try again.');
+                setContactFeedback('Could not send message. Please try again.', 'error');
+            } finally {
+                if (contactSubmitBtn) contactSubmitBtn.disabled = false;
             }
         });
     }
@@ -1495,9 +1602,21 @@ function setupEventListeners() {
             const username = adminUserInput ? adminUserInput.value.trim() : '';
             const password = adminPassInput ? adminPassInput.value : '';
             if (!username || !password) {
-                alert('Enter admin username and password.');
+                setAdminFeedback('Enter admin username and password.', 'error');
                 return;
             }
+            if (username.length > ADMIN_USER_MAX_LENGTH) {
+                setAdminFeedback(`Admin username must be ${ADMIN_USER_MAX_LENGTH} characters or fewer.`, 'error');
+                if (adminUserInput) adminUserInput.focus();
+                return;
+            }
+            if (password.length > ADMIN_PASS_MAX_LENGTH) {
+                setAdminFeedback(`Admin password must be ${ADMIN_PASS_MAX_LENGTH} characters or fewer.`, 'error');
+                if (adminPassInput) adminPassInput.focus();
+                return;
+            }
+            adminLoginBtn.disabled = true;
+            setAdminFeedback('Signing in...', 'info');
             try {
                 const res = await fetch(`${API_BASE_URL}/admin/contact/login`, {
                     method: 'POST',
@@ -1511,7 +1630,7 @@ function setupEventListeners() {
                 const data = await res.json();
                 adminToken = data.token;
                 localStorage.setItem('admin_token', adminToken);
-                alert('Admin login successful.');
+                setAdminFeedback('Admin login successful.', 'success');
                 if (adminPassInput) adminPassInput.value = '';
                 setAdminStatus(true);
                 if (adminAutoRefresh && adminAutoRefresh.checked) {
@@ -1519,7 +1638,9 @@ function setupEventListeners() {
                 }
             } catch (err) {
                 console.error('Admin login failed:', err.message);
-                alert('Login failed.');
+                setAdminFeedback(err.message || 'Login failed.', 'error');
+            } finally {
+                adminLoginBtn.disabled = false;
             }
         });
     }
@@ -1537,6 +1658,7 @@ function setupEventListeners() {
             adminItemsCache = [];
             setAdminStatus(false);
             stopAdminAutoRefresh();
+            setAdminFeedback('Logged out.', 'info');
         });
     }
 
@@ -1549,9 +1671,12 @@ function setupEventListeners() {
     if (exportMessagesBtn) {
         exportMessagesBtn.addEventListener('click', async () => {
             if (!adminToken) {
-                alert('Please login first.');
+                setAdminFeedback('Please login first.', 'error');
                 return;
             }
+            exportMessagesBtn.disabled = true;
+            exportMessagesBtn.innerHTML = `<span class="spinner-inline"></span> Exporting...`;
+            setAdminFeedback('Preparing CSV export...', 'info');
             try {
                 const params = new URLSearchParams();
                 if (adminSearchInput && adminSearchInput.value.trim()) {
@@ -1576,9 +1701,13 @@ function setupEventListeners() {
                 a.click();
                 a.remove();
                 window.URL.revokeObjectURL(url);
+                setAdminFeedback('CSV export started.', 'success');
             } catch (err) {
                 console.error('Export failed:', err.message);
-                alert('Export failed.');
+                setAdminFeedback(err.message || 'Export failed.', 'error');
+            } finally {
+                exportMessagesBtn.disabled = false;
+                exportMessagesBtn.innerHTML = 'Export CSV';
             }
         });
     }
@@ -1623,6 +1752,7 @@ function setupEventListeners() {
         applyAdminFiltersBtn.addEventListener('click', () => {
             if (adminSearchInput) adminSearchInput.value = '';
             adminPage = 1;
+            setAdminFeedback('Applying date filters...', 'info');
             loadAdminMessages();
         });
     }
@@ -1633,6 +1763,7 @@ function setupEventListeners() {
             if (adminDateTo) adminDateTo.value = '';
             if (adminSearchInput) adminSearchInput.value = '';
             adminPage = 1;
+            setAdminFeedback('Filters cleared.', 'info');
             loadAdminMessages();
         });
     }
@@ -1650,6 +1781,7 @@ function setupEventListeners() {
             if (adminDateFrom) adminDateFrom.value = from.toISOString().slice(0, 10);
             if (adminDateTo) adminDateTo.value = to.toISOString().slice(0, 10);
             adminPage = 1;
+            setAdminFeedback('Preset applied. Loading messages...', 'info');
             loadAdminMessages();
         });
     });
@@ -1658,14 +1790,17 @@ function setupEventListeners() {
         adminAutoRefresh.addEventListener('change', () => {
             if (adminAutoRefresh.checked) {
                 startAdminAutoRefresh();
+                setAdminFeedback(`Auto-refresh enabled (${adminRefreshInterval.value}s).`, 'info');
             } else {
                 stopAdminAutoRefresh();
+                setAdminFeedback('Auto-refresh disabled.', 'info');
             }
         });
 
         adminRefreshInterval.addEventListener('change', () => {
             if (adminAutoRefresh.checked) {
                 startAdminAutoRefresh();
+                setAdminFeedback(`Auto-refresh interval set to ${adminRefreshInterval.value}s.`, 'info');
             }
         });
     }
@@ -2026,7 +2161,7 @@ function renderMessages(items) {
     messagesList.innerHTML = items.map(m => `
         <div class="message-item">
             <div><strong>${m.subject}</strong></div>
-            <div class="message-meta">${m.name} • ${m.email} • ${new Date(m.createdAt).toLocaleString()}</div>
+            <div class="message-meta">${m.name} - ${m.email} - ${new Date(m.createdAt).toLocaleString()}</div>
             <p>${m.message}</p>
             <button class="filter-btn secondary" data-delete="${m._id}">Delete</button>
         </div>
@@ -2035,10 +2170,11 @@ function renderMessages(items) {
     messagesList.querySelectorAll('button[data-delete]').forEach(btn => {
         btn.addEventListener('click', async () => {
             if (!adminToken) {
-                alert('Please login first.');
+                setAdminFeedback('Please login first.', 'error');
                 return;
             }
             const id = btn.dataset.delete;
+            btn.disabled = true;
             try {
                 const res = await fetch(`${API_BASE_URL}/admin/contact/messages/${id}`, {
                     method: 'DELETE',
@@ -2049,9 +2185,17 @@ function renderMessages(items) {
                     throw new Error(text || 'Failed');
                 }
                 btn.closest('.message-item').remove();
+                adminItemsCache = adminItemsCache.filter((item) => String(item._id) !== String(id));
+                adminTotal = Math.max(0, (adminTotal || 0) - 1);
+                updateAdminPagination();
+                if (messagesList && !messagesList.querySelector('.message-item')) {
+                    messagesList.innerHTML = `<p class="form-note">No messages yet.</p>`;
+                }
+                setAdminFeedback('Message deleted.', 'success');
             } catch (err) {
                 console.error('Delete failed:', err.message);
-                alert('Delete failed.');
+                setAdminFeedback(err.message || 'Delete failed.', 'error');
+                btn.disabled = false;
             }
         });
     });
@@ -2079,7 +2223,7 @@ function setAdminStatus(isLoggedIn) {
 
 async function loadAdminMessages() {
     if (!adminToken) {
-        alert('Please login first.');
+        setAdminFeedback('Please login first.', 'error');
         return;
     }
     try {
@@ -2087,6 +2231,7 @@ async function loadAdminMessages() {
             loadMessagesBtn.disabled = true;
             loadMessagesBtn.innerHTML = `<span class="spinner-inline"></span> Loading...`;
         }
+        setAdminFeedback('Loading messages...', 'info');
         const params = new URLSearchParams();
         params.set('page', String(adminPage));
         params.set('limit', '20');
@@ -2109,11 +2254,14 @@ async function loadAdminMessages() {
         renderMessages(adminItemsCache);
         updateAdminPagination();
         loadAdminStats();
+        const count = Array.isArray(adminItemsCache) ? adminItemsCache.length : 0;
+        setAdminFeedback(`Loaded ${count} message${count === 1 ? '' : 's'}.`, 'success');
     } catch (err) {
         console.error('Load messages failed:', err.message);
         if (messagesList) {
             messagesList.innerHTML = `<p class="form-note">Failed to load messages.</p>`;
         }
+        setAdminFeedback(err.message || 'Failed to load messages.', 'error');
     } finally {
         if (loadMessagesBtn) {
             loadMessagesBtn.disabled = false;
@@ -2167,3 +2315,4 @@ function stopAdminAutoRefresh() {
     }
 }
 // Expose functions to global scope for HTML onclick
+

@@ -4,6 +4,65 @@ const ContactMessage = require('../models/ContactMessage');
 const nodemailer = require('nodemailer');
 
 const router = express.Router();
+const EMAIL_MAX_LENGTH = 254;
+const EMAIL_LOCAL_PART_MAX = 64;
+const NAME_MIN_LENGTH = 2;
+const NAME_MAX_LENGTH = 60;
+const SUBJECT_MIN_LENGTH = 4;
+const SUBJECT_MAX_LENGTH = 100;
+const MESSAGE_MIN_LENGTH = 10;
+const MESSAGE_MAX_LENGTH = 1500;
+
+function normalizeSingleLine(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeMessage(value) {
+    return String(value || '').replace(/\r\n/g, '\n').trim();
+}
+
+function normalizeEmail(value) {
+    return String(value || '').trim().toLowerCase();
+}
+
+function validateEmail(email) {
+    if (!email) return 'Please enter your email address.';
+    if (email.length > EMAIL_MAX_LENGTH) return 'Email must be 254 characters or fewer.';
+    const parts = email.split('@');
+    if (parts.length !== 2) return 'Enter a valid email address.';
+    const [local, domain] = parts;
+    if (!local || !domain) return 'Enter a valid email address.';
+    if (local.length > EMAIL_LOCAL_PART_MAX) return 'Email local part must be 64 characters or fewer.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Enter a valid email address.';
+    return '';
+}
+
+function validateName(name) {
+    if (!name) return 'Please enter your full name.';
+    if (name.length < NAME_MIN_LENGTH) return 'Name must be at least 2 characters.';
+    if (name.length > NAME_MAX_LENGTH) return 'Name must be 60 characters or fewer.';
+    if (!/^[a-zA-Z\s.'-]+$/.test(name)) return 'Name can only include letters, spaces, and .\'- characters.';
+    const letterCount = name.replace(/[^a-zA-Z]/g, '').length;
+    if (letterCount < 2) return 'Please include at least two letters in your name.';
+    return '';
+}
+
+function validateSubject(subject) {
+    if (!subject) return 'Please enter a subject.';
+    if (subject.length < SUBJECT_MIN_LENGTH) return 'Subject must be at least 4 characters.';
+    if (subject.length > SUBJECT_MAX_LENGTH) return 'Subject must be 100 characters or fewer.';
+    if (!/[a-zA-Z0-9]/.test(subject)) return 'Subject must include letters or numbers.';
+    return '';
+}
+
+function validateMessage(message) {
+    if (!message) return 'Please enter a message.';
+    if (message.length < MESSAGE_MIN_LENGTH) return 'Message must be at least 10 characters.';
+    if (message.length > MESSAGE_MAX_LENGTH) return 'Message must be 1500 characters or fewer.';
+    const wordCount = message.split(/\s+/).filter(Boolean).length;
+    if (wordCount < 2) return 'Please add a bit more detail.';
+    return '';
+}
 
 router.post('/', async (req, res) => {
     try {
@@ -11,9 +70,23 @@ router.post('/', async (req, res) => {
             return res.status(503).json({ message: 'Database not connected' });
         }
 
-        const { name, email, subject, message } = req.body || {};
+        const { name: rawName, email: rawEmail, subject: rawSubject, message: rawMessage } = req.body || {};
+        const name = normalizeSingleLine(rawName);
+        const email = normalizeEmail(rawEmail);
+        const subject = normalizeSingleLine(rawSubject);
+        const message = normalizeMessage(rawMessage);
+
         if (!name || !email || !subject || !message) {
             return res.status(400).json({ message: 'All fields are required' });
+        }
+        const errors = [
+            validateName(name),
+            validateEmail(email),
+            validateSubject(subject),
+            validateMessage(message)
+        ].filter(Boolean);
+        if (errors.length > 0) {
+            return res.status(400).json({ message: errors[0] });
         }
 
         // Basic rate limit: max 5 messages per IP in 15 minutes
@@ -28,18 +101,18 @@ router.post('/', async (req, res) => {
         }
 
         const saved = await ContactMessage.create({
-            name: String(name).trim(),
-            email: String(email).trim(),
-            subject: String(subject).trim(),
-            message: String(message).trim(),
+            name,
+            email,
+            subject,
+            message,
             ip
         });
 
         await sendContactEmail({
-            name: String(name).trim(),
-            email: String(email).trim(),
-            subject: String(subject).trim(),
-            message: String(message).trim(),
+            name,
+            email,
+            subject,
+            message,
         });
 
         res.status(201).json({ success: true, id: saved._id });

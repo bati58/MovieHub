@@ -1,18 +1,20 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieHub — Admin</title>
+    <title>MovieHub - Admin</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body data-page="admin">
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark moviehub-navbar sticky-top">
         <div class="container">
             <a href="index.html" class="logo">MovieHub</a>
             <div class="nav-links">
@@ -30,13 +32,13 @@
                 <a href="admin.html" class="active"><i class="fas fa-shield-halved"></i> Admin</a>
             </div>
             <div class="search-container">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Search movies...">
+                <div class="search-box input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search movies...">
                     <button id="searchBtn"><i class="fas fa-search"></i></button>
                 </div>
                 <div id="searchSuggestions" class="search-suggestions"></div>
             </div>
-            <button class="menu-toggle">
+            <button class="menu-toggle navbar-toggler" type="button" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
@@ -59,8 +61,14 @@
                     <div class="admin-card-title">Access</div>
                     <p class="form-note admin-note">Authorized admins only. Use the credentials configured on the server.</p>
                     <div class="admin-form admin-form-auth">
-                        <input type="text" id="adminUserInput" placeholder="Admin username" autocomplete="username">
-                        <input type="password" id="adminPassInput" placeholder="Admin password" autocomplete="current-password">
+                        <div class="admin-field">
+                            <label for="adminUserInput">Admin Username</label>
+                            <input type="text" id="adminUserInput" placeholder="Admin username" autocomplete="username" required maxlength="64">
+                        </div>
+                        <div class="admin-field">
+                            <label for="adminPassInput">Admin Password</label>
+                            <input type="password" id="adminPassInput" placeholder="Admin password" autocomplete="current-password" required maxlength="256">
+                        </div>
                         <button id="adminLoginBtn" class="filter-btn">Login</button>
                         <button id="adminLogoutBtn" class="filter-btn secondary">Logout</button>
                         <button id="loadMessagesBtn" class="filter-btn secondary">Load Messages</button>
@@ -82,7 +90,10 @@
                 <div class="admin-card admin-filter-card">
                     <div class="admin-card-title">Filters</div>
                     <div class="admin-form admin-form-filters">
-                        <input type="text" id="adminSearchInput" placeholder="Search messages...">
+                        <div class="admin-field admin-field-search">
+                            <label for="adminSearchInput">Search</label>
+                            <input type="text" id="adminSearchInput" placeholder="Search messages..." maxlength="200">
+                        </div>
                         <label>
                             From
                             <input type="date" id="adminDateFrom">
@@ -118,6 +129,7 @@
                     </div>
                 </div>
             </div>
+            <p class="form-note admin-feedback" id="adminFeedback" aria-live="polite"></p>
             <div id="messagesList" class="messages-list">
                 <p class="form-note">Log in to load and manage recent messages.</p>
             </div>
@@ -131,14 +143,45 @@
 
     <footer class="footer">
         <div class="container">
+            <div class="footer-social-row" aria-label="Contact links">
+                <a class="social-link social-email" href="https://mail.google.com/mail/?view=cm&fs=1&to=batijano58@gmail.com"
+                    aria-label="Email" title="Email" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-envelope"></i>
+                </a>
+                <a class="social-link social-whatsapp" href="https://wa.me/251989977058" target="_blank"
+                    rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a class="social-link social-telegram" href="https://t.me/CMY_TR" target="_blank"
+                    rel="noopener noreferrer" aria-label="Telegram" title="Telegram">
+                    <i class="fab fa-telegram"></i>
+                </a>
+                <a class="social-link social-instagram" href="https://instagram.com/bati_jano" target="_blank"
+                    rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 MovieHub. All rights reserved.</p>
+                <p>&copy; MovieHub. All rights reserved.</p>
             </div>
         </div>
     </footer>
+    <!-- Movie Modal -->
+    <div id="movieModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="movieDetails">
+                <!-- Movie details will be loaded here -->
+            </div>
+        </div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="main.js"></script>
     <script src="search.js"></script>
 </body>
 
 </html>
+
+
+

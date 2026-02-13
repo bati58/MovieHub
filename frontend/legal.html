@@ -1,18 +1,20 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieHub — Legal & Contact</title>
+    <title>MovieHub - Legal & Contact</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body data-page="legal">
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark moviehub-navbar sticky-top">
         <div class="container">
             <a href="index.html" class="logo">MovieHub</a>
             <div class="nav-links">
@@ -30,13 +32,13 @@
                 <a href="admin.html"><i class="fas fa-shield-halved"></i> Admin</a>
             </div>
             <div class="search-container">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Search movies...">
+                <div class="search-box input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search movies...">
                     <button id="searchBtn"><i class="fas fa-search"></i></button>
                 </div>
                 <div id="searchSuggestions" class="search-suggestions"></div>
             </div>
-            <button class="menu-toggle">
+            <button class="menu-toggle navbar-toggler" type="button" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
@@ -69,7 +71,7 @@
                 <div id="contact" class="legal-card">
                     <h3>Contact</h3>
                     <p>Email: batijano58@gmail.com</p>
-                    <p>For urgent requests, include “DMCA” in the subject.</p>
+                    <p>For urgent requests, include "DMCA" in the subject.</p>
                     <div class="contact-links">
                         <a href="https://mail.google.com/mail/?view=cm&fs=1&to=batijano58@gmail.com" target="_blank">
                         <i class="fas fa-envelope"></i>Email</a>
@@ -85,30 +87,38 @@
             </div>
             <div class="contact-form">
                 <h3>Send a Message</h3>
+                <p class="form-note contact-intro">Questions, feedback, or support requests. We usually reply within 24 hours.</p>
                 <form id="contactForm" novalidate>
                     <div class="form-row">
                         <div class="form-field">
-                            <input type="text" id="contactName" name="name" placeholder="Your name" required
+                            <label for="contactName">Full Name</label>
+                            <input type="text" id="contactName" name="name" placeholder="Your name" required minlength="2" maxlength="60" pattern="[A-Za-z\s.'-]{2,60}"
                                 autocomplete="name" aria-describedby="contactNameError">
                             <small class="field-error" id="contactNameError" aria-live="polite"></small>
                         </div>
                         <div class="form-field">
-                            <input type="email" id="contactEmail" name="email" placeholder="Your email" required
+                            <label for="contactEmail">Email Address</label>
+                            <input type="email" id="contactEmail" name="email" placeholder="Your email" required maxlength="254"
                                 autocomplete="email" aria-describedby="contactEmailError">
                             <small class="field-error" id="contactEmailError" aria-live="polite"></small>
                         </div>
                     </div>
                     <div class="form-field">
-                        <input type="text" id="contactSubject" name="subject" placeholder="Subject" required
+                        <label for="contactSubject">Subject</label>
+                        <input type="text" id="contactSubject" name="subject" placeholder="Subject" required minlength="4" maxlength="100"
                             autocomplete="off" aria-describedby="contactSubjectError">
                         <small class="field-error" id="contactSubjectError" aria-live="polite"></small>
                     </div>
                     <div class="form-field">
-                        <textarea id="contactMessage" name="message" rows="5" placeholder="Your message" required
+                        <label for="contactMessage">Message</label>
+                        <textarea id="contactMessage" name="message" rows="5" placeholder="Your message" required minlength="10" maxlength="1500"
                             aria-describedby="contactMessageError"></textarea>
                         <small class="field-error" id="contactMessageError" aria-live="polite"></small>
                     </div>
-                    <button type="submit" class="legal-btn">Send Message</button>
+                    <p class="form-note contact-feedback" id="contactFeedback" aria-live="polite"></p>
+                    <div class="contact-form-actions">
+                        <button type="submit" class="legal-btn">Send Message</button>
+                    </div>
                 </form>
 
             </div>
@@ -117,11 +127,38 @@
 
     <footer class="footer">
         <div class="container">
+            <div class="footer-social-row" aria-label="Contact links">
+                <a class="social-link social-email" href="https://mail.google.com/mail/?view=cm&fs=1&to=batijano58@gmail.com"
+                    aria-label="Email" title="Email" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-envelope"></i>
+                </a>
+                <a class="social-link social-whatsapp" href="https://wa.me/251989977058" target="_blank"
+                    rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+                <a class="social-link social-telegram" href="https://t.me/CMY_TR" target="_blank"
+                    rel="noopener noreferrer" aria-label="Telegram" title="Telegram">
+                    <i class="fab fa-telegram"></i>
+                </a>
+                <a class="social-link social-instagram" href="https://instagram.com/bati_jano" target="_blank"
+                    rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 MovieHub. All rights reserved.</p>
             </div>
         </div>
     </footer>
+    <!-- Movie Modal -->
+    <div id="movieModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="movieDetails">
+                <!-- Movie details will be loaded here -->
+            </div>
+        </div>
+    </div>
 
     <!-- Legal Modal -->
     <div id="legalModal" class="modal">
@@ -134,8 +171,13 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="main.js"></script>
     <script src="search.js"></script>
 </body>
 
 </html>
+
+
+
+
