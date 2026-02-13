@@ -1449,6 +1449,46 @@ a {
     font-size: 0.86rem;
 }
 
+.password-field {
+    position: relative;
+}
+
+.password-field input {
+    width: 100%;
+    padding-right: 2.6rem;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.4rem;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--mh-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.password-toggle:hover {
+    color: var(--mh-text);
+    background: rgba(148, 163, 184, 0.15);
+}
+
+.password-toggle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+}
+
+.password-toggle.is-revealed {
+    color: #38bdf8;
+}
+
 .auth-actions {
     display: flex;
     gap: 0.45rem;
@@ -1883,6 +1923,19 @@ body[data-theme='light'] .auth-form-header p {
 
 body[data-theme='light'] .field-error {
     color: #b91c1c;
+}
+
+body[data-theme='light'] .password-toggle {
+    color: #64748b;
+}
+
+body[data-theme='light'] .password-toggle:hover {
+    color: #0f172a;
+    background: rgba(148, 163, 184, 0.2);
+}
+
+body[data-theme='light'] .password-toggle.is-revealed {
+    color: #0369a1;
 }
 
 body[data-theme='light'] .auth-message.is-info,

@@ -685,6 +685,9 @@ function initUserAccount() {
             updateResetState();
         });
     }
+    setupAuthPasswordToggles();
+    setupAdminPasswordToggle();
+    resetAdminPasswordVisibility();
     setupAuthValidation();
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -743,6 +746,8 @@ function initUserAccount() {
 
 function openAuthModal(defaultTab = 'login') {
     if (!authModal) return;
+    setupAuthPasswordToggles();
+    resetAuthPasswordVisibility();
     authModal.style.display = 'block';
     document.body.style.overflow = 'hidden';
     setAuthMessage('');
@@ -753,6 +758,7 @@ function closeAuthModalView() {
     if (!authModal) return;
     authModal.style.display = 'none';
     document.body.style.overflow = 'auto';
+    resetAuthPasswordVisibility();
     clearAuthFieldErrors();
 }
 
@@ -768,6 +774,106 @@ function switchAuthTab(tab) {
     clearAuthFieldErrors();
     if (tab === 'reset') {
         updateResetState();
+    }
+}
+
+function syncPasswordToggleState(toggleBtn, input) {
+    if (!toggleBtn || !input) return;
+    const isRevealed = input.type === 'text';
+    const label = isRevealed ? 'Hide password' : 'Show password';
+    toggleBtn.setAttribute('aria-label', label);
+    toggleBtn.setAttribute('aria-pressed', isRevealed ? 'true' : 'false');
+    toggleBtn.setAttribute('title', label);
+    toggleBtn.classList.toggle('is-revealed', isRevealed);
+    const icon = toggleBtn.querySelector('i');
+    if (icon) {
+        icon.classList.toggle('fa-eye', !isRevealed);
+        icon.classList.toggle('fa-eye-slash', isRevealed);
+    }
+}
+
+function ensurePasswordToggleForInput(input) {
+    if (!input || !input.id) return null;
+    let wrapper = input.closest('.password-field');
+    if (!wrapper) {
+        wrapper = document.createElement('div');
+        wrapper.className = 'password-field';
+        input.insertAdjacentElement('beforebegin', wrapper);
+        wrapper.appendChild(input);
+    }
+
+    let toggleBtn = wrapper.querySelector('.password-toggle');
+    if (!toggleBtn) {
+        toggleBtn = document.createElement('button');
+        toggleBtn.type = 'button';
+        toggleBtn.className = 'password-toggle';
+        toggleBtn.dataset.passwordTarget = input.id;
+        toggleBtn.innerHTML = '<i class="fas fa-eye" aria-hidden="true"></i>';
+        wrapper.appendChild(toggleBtn);
+    }
+
+    if (toggleBtn.dataset.bound === 'true') {
+        syncPasswordToggleState(toggleBtn, input);
+        return toggleBtn;
+    }
+
+    toggleBtn.dataset.bound = 'true';
+    syncPasswordToggleState(toggleBtn, input);
+    toggleBtn.addEventListener('click', () => {
+        if (toggleBtn.disabled || input.disabled) return;
+        input.type = input.type === 'password' ? 'text' : 'password';
+        syncPasswordToggleState(toggleBtn, input);
+
+        const cursorPos = input.value.length;
+        try {
+            input.focus({ preventScroll: true });
+        } catch {
+            input.focus();
+        }
+        if (typeof input.setSelectionRange === 'function') {
+            try {
+                input.setSelectionRange(cursorPos, cursorPos);
+            } catch {
+                // Ignore selection errors for unsupported input states
+            }
+        }
+    });
+
+    return toggleBtn;
+}
+
+function setupAuthPasswordToggles() {
+    if (!authModal) return;
+    const passwordInputs = authModal.querySelectorAll('#loginPassword, #registerPassword, #resetPassword');
+    passwordInputs.forEach((input) => ensurePasswordToggleForInput(input));
+}
+
+function setupAdminPasswordToggle() {
+    if (!adminPassInput) return;
+    ensurePasswordToggleForInput(adminPassInput);
+}
+
+function resetAuthPasswordVisibility() {
+    if (!authModal) return;
+    authModal.querySelectorAll('.password-toggle').forEach((toggleBtn) => {
+        const targetId = toggleBtn.dataset.passwordTarget;
+        const input = targetId ? document.getElementById(targetId) : null;
+        if (!input) return;
+        if (input.type !== 'password') {
+            input.type = 'password';
+        }
+        syncPasswordToggleState(toggleBtn, input);
+    });
+}
+
+function resetAdminPasswordVisibility() {
+    if (!adminPassInput) return;
+    if (adminPassInput.type !== 'password') {
+        adminPassInput.type = 'password';
+    }
+    const toggleBtn = adminPassInput.closest('.password-field')?.querySelector(`.password-toggle[data-password-target="${adminPassInput.id}"]`);
+    if (toggleBtn) {
+        syncPasswordToggleState(toggleBtn, adminPassInput);
     }
 }
 
@@ -1426,6 +1532,8 @@ function setupEventListeners() {
         const contactMessage = document.getElementById('contactMessage');
         const contactFeedback = document.getElementById('contactFeedback');
         const contactSubmitBtn = contactForm.querySelector('button[type="submit"]');
+        const CONTACT_SUCCESS_FEEDBACK_DURATION_MS = 3500;
+        let contactFeedbackTimer = null;
 
         const normalizeSingleLine = (value) => value.replace(/\s+/g, ' ').trim();
         const normalizeMessage = (value) => value.replace(/\r\n/g, '\n').trim();
@@ -1477,13 +1585,26 @@ function setupEventListeners() {
             }]
         ]);
 
-        const setContactFeedback = (message = '', state = 'info') => {
+        const clearContactFeedbackTimer = () => {
+            if (contactFeedbackTimer) {
+                clearTimeout(contactFeedbackTimer);
+                contactFeedbackTimer = null;
+            }
+        };
+
+        const setContactFeedback = (message = '', state = 'info', { autoHideMs = 0 } = {}) => {
             if (!contactFeedback) return;
+            clearContactFeedbackTimer();
             contactFeedback.textContent = message;
             contactFeedback.classList.remove('is-visible', 'is-info', 'is-success', 'is-error');
             if (!message) return;
             contactFeedback.classList.add('is-visible');
             contactFeedback.classList.add(state === 'success' ? 'is-success' : state === 'error' ? 'is-error' : 'is-info');
+            if (autoHideMs > 0) {
+                contactFeedbackTimer = setTimeout(() => {
+                    setContactFeedback('');
+                }, autoHideMs);
+            }
         };
 
         const showFieldError = (input, message) => {
@@ -1588,7 +1709,9 @@ function setupEventListeners() {
                 }
                 contactForm.reset();
                 [contactName, contactEmail, contactSubject, contactMessage].forEach((input) => clearFieldError(input));
-                setContactFeedback('Message sent successfully. Thank you for reaching out.', 'success');
+                setContactFeedback('Message sent successfully. Thank you for reaching out.', 'success', {
+                    autoHideMs: CONTACT_SUCCESS_FEEDBACK_DURATION_MS
+                });
             } catch (err) {
                 console.error('Contact submit failed:', err.message);
                 setContactFeedback('Could not send message. Please try again.', 'error');
@@ -1633,6 +1756,7 @@ function setupEventListeners() {
                 localStorage.setItem('admin_token', adminToken);
                 setAdminFeedback('Admin login successful.', 'success');
                 if (adminPassInput) adminPassInput.value = '';
+                resetAdminPasswordVisibility();
                 setAdminStatus(true);
                 if (adminAutoRefresh && adminAutoRefresh.checked) {
                     startAdminAutoRefresh();
@@ -1652,6 +1776,7 @@ function setupEventListeners() {
             localStorage.removeItem('admin_token');
             if (adminUserInput) adminUserInput.value = '';
             if (adminPassInput) adminPassInput.value = '';
+            resetAdminPasswordVisibility();
             if (messagesList) {
                 messagesList.innerHTML = `<p class="form-note">Logged out.</p>`;
             }
@@ -2351,4 +2476,3 @@ function stopAdminAutoRefresh() {
     }
 }
 // Expose functions to global scope for HTML onclick
-
